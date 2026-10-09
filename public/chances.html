@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Borda — Official Winning Chances & Odds Disclosure</title>
+  <meta name="description" content="Official disclosure of winning chances and odds for the Borda Savings Sweepstakes. Required by sweepstakes law.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0B0E11;
+      --bg2: #12151A;
+      --bg3: #1A1E26;
+      --green: #00DC82;
+      --red: #FF6838;
+      --text: #EAECEF;
+      --text2: #848E9C;
+      --text3: #5E6673;
+      --border: rgba(255,255,255,0.06);
+    }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--green);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 32px;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--text2);
+      margin-bottom: 32px;
+    }
+    .updated {
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 24px;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    p, li {
+      font-size: 14px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .highlight {
+      color: var(--green);
+      font-weight: 700;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .summary-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .summary-card .label {
+      font-size: 12px;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .summary-card .value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .summary-card .note {
+      font-size: 11px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+    .tier-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .tier-common { background: rgba(0,220,130,0.08); color: #00DC82; }
+    .tier-uncommon { background: rgba(66,133,244,0.08); color: #4285F4; }
+    .tier-rare { background: rgba(156,39,176,0.08); color: #CE93D8; }
+    .tier-epic { background: rgba(255,152,0,0.08); color: #FF9800; }
+    .tier-legendary { background: rgba(255,215,0,0.08); color: #FFD700; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg2);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    thead th {
+      background: var(--bg3);
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    thead th:first-child { border-radius: 12px 0 0 0; }
+    thead th:last-child { border-radius: 0 12px 0 0; }
+    tbody td {
+      padding: 12px 16px;
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr:hover { background: rgba(0,220,130,0.02); }
+    .ticker { font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+    .stock-name { color: var(--text2); }
+    .odds-good { color: var(--green); font-weight: 600; }
+    .odds-mid { color: #4285F4; font-weight: 600; }
+    .odds-hard { color: #CE93D8; font-weight: 600; }
+    .odds-rare { color: #FF9800; font-weight: 600; }
+    .odds-legendary { color: #FFD700; font-weight: 600; }
+
+    .legal-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .legal-box p {
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 24px; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      table { font-size: 12px; }
+      thead th, tbody td { padding: 8px 10px; }
+      .container { padding: 24px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">&larr; Back to Borda</a>
+
+    <h1>Winning Chances & Odds</h1>
+    <p class="subtitle">Official disclosure of all sweepstakes winning probabilities for the Borda Savings Sweepstakes.</p>
+    <p class="updated">Last updated: <span id="update-date"></span></p>
+
+    <div class="section">
+      <h2>Overall Win Rates</h2>
+      <p>Each spin of the Borda slot machine has the following fixed probabilities of producing a win <strong style="color:var(--text)">per active payline</strong>. Only 3-of-a-kind across a payline counts as a win. These odds are constant regardless of deposit amount, account balance, or number of spins purchased. <strong style="color:var(--text)">No purchase or payment changes your chances of winning.</strong></p>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="label">3-OF-A-KIND (PER LINE)</div>
+          <div class="value" style="color:var(--green)">1 in 20</div>
+          <div class="note">5.0% per payline per spin</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">LOSS (PER LINE)</div>
+          <div class="value" style="color:var(--red)">19 in 20</div>
+          <div class="note">95.0% per payline per spin</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">1 LINE — ANY WIN</div>
+          <div class="value" style="color:var(--green)">5.0%</div>
+          <div class="note">1 payline active</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">3 LINES — ANY WIN</div>
+          <div class="value" style="color:var(--green)">~14.3%</div>
+          <div class="note">3 independent paylines</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Multi-Payline System</h2>
+      <p>Borda uses a 3&times;3 grid slot machine with up to 3 paylines. Each payline is checked independently for a 3-of-a-kind match. Only matching all 3 symbols on a payline counts as a win.</p>
+      <p><strong style="color:var(--text)">Payline 1 — Middle Row:</strong> The center row across all 3 reels (always active).</p>
+      <p><strong style="color:var(--text)">Payline 2 — Diagonal &searr;:</strong> Top-left &rarr; center &rarr; bottom-right (active with 3-line play).</p>
+      <p><strong style="color:var(--text)">Payline 3 — Diagonal &nearr;:</strong> Bottom-left &rarr; center &rarr; top-right (active with 3-line play).</p>
+      <p>Playing 3 lines costs 3&times; the share multiplier in spins (e.g., 3 lines at 2&times; = 6 spins per pull). Each winning payline awards shares independently.</p>
+    </div>
+
+    <div class="section">
+      <h2>How Wins Are Determined</h2>
+      <p>When a spin produces a 3-of-a-kind on a payline, the winning stock is determined in two steps:</p>
+      <p><strong style="color:var(--text)">Step 1 — Tier selection:</strong> A rarity tier is chosen using the tier weights below. Common stocks (under $50) are selected 55% of the time, while legendary stocks ($650+) are selected only 2% of the time.</p>
+      <p><strong style="color:var(--text)">Step 2 — Stock selection:</strong> Within the chosen tier, the specific stock is selected proportionally to its weight (see table below). Stocks with higher weights within a tier appear more frequently.</p>
+
+      <div class="summary-grid" style="margin-top:16px">
+        <div class="summary-card">
+          <div class="label">COMMON (UNDER $50)</div>
+          <div class="value" style="color:#00DC82">55%</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">UNCOMMON ($50–200)</div>
+          <div class="value" style="color:#4285F4">25%</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">RARE ($200–500)</div>
+          <div class="value" style="color:#CE93D8">12%</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">EPIC ($500–650)</div>
+          <div class="value" style="color:#FF9800">6%</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">LEGENDARY ($650+)</div>
+          <div class="value" style="color:#FFD700">2%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Per-Stock Winning Odds</h2>
+      <p>The table below shows the exact probability of winning each specific stock on any single payline. With 3-line play, multiply the per-line chance by 3 for the approximate per-spin probability (paylines are independent).</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Price</th>
+            <th>Tier</th>
+            <th>Win % (per line)</th>
+            <th>Win Odds (per line)</th>
+          </tr>
+        </thead>
+        <tbody id="odds-table"></tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Prize Values — Whole Shares</h2>
+      <p>When you win 3-of-a-kind on a payline, you receive <strong style="color:var(--text)">whole shares</strong> of the winning stock equal to your share multiplier. The dollar value of the prize depends on the stock's current market price.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Share Multiplier</th>
+            <th>Shares Won (per winning line)</th>
+            <th>Spins Per Pull (1 Line)</th>
+            <th>Spins Per Pull (3 Lines)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1&times;</td><td>1 share</td><td>1 spin</td><td>3 spins</td></tr>
+          <tr><td>2&times;</td><td>2 shares</td><td>2 spins</td><td>6 spins</td></tr>
+          <tr><td>3&times;</td><td>3 shares</td><td>3 spins</td><td>9 spins</td></tr>
+          <tr><td>5&times;</td><td>5 shares</td><td>5 spins</td><td>15 spins</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px; font-size:12px; color:var(--text3)">Example: Playing 3 lines with a 5&times; multiplier costs 15 spins. If 2 paylines hit 3-of-a-kind on Starbucks ($95.71), you win 10 shares (5 per line) worth $957.10.</p>
+    </div>
+
+    <div class="section">
+      <h2>Cash-Out Fee</h2>
+      <p>When you sell your stock holdings for cash (added to your portfolio cash balance), a <strong style="color:var(--text)">3% placement fee</strong> is deducted from the gross value. Converting holdings to additional spins does not incur this fee.</p>
+      <table>
+        <thead>
+          <tr><th>Action</th><th>Fee</th><th>Example ($100 value)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Hold Shares</td><td>None</td><td>Keep $100 in stock</td></tr>
+          <tr><td>Cash Out to Balance</td><td>3%</td><td>Receive $97.00 cash</td></tr>
+          <tr><td>Convert to Spins</td><td>None</td><td>Get 100 spins</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="legal-box">
+        <p style="font-weight:700; color:var(--text); margin-bottom:8px; font-size:14px;">Important Legal Notice</p>
+        <p>NO PURCHASE OR PAYMENT IS NECESSARY TO ENTER OR WIN. A PURCHASE OR PAYMENT OF ANY KIND WILL NOT INCREASE YOUR CHANCES OF WINNING.</p>
+        <p style="margin-top:8px;">The Borda Savings Sweepstakes is open to legal residents of the United States (excluding CT, HI, ID, IN, ME, MI, MT, NJ, NY, NV, TN, and WA) who are 18 years of age or older. Free entry is available via the Alternate Method of Entry (AMOE) — see <a href="/demo-user" style="color:var(--green)">Official Rules</a> for details.</p>
+        <p style="margin-top:8px;">All odds disclosed on this page are exact mathematical probabilities computed from the game's source code. They are not estimates. Stock prices shown are reference prices and may vary based on market conditions at the time of the spin.</p>
+        <p style="margin-top:8px;">For questions about winning chances, contact: support@borda.ai</p>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding:24px 0; border-top:1px solid var(--border); margin-top:40px;">
+      <p style="font-size:12px; color:var(--text3);">&copy; 2026 Borda, Inc. All rights reserved. | <a href="/" style="color:var(--green); text-decoration:none;">Home</a> | <a href="/demo-user" style="color:var(--green); text-decoration:none;">Try Borda</a></p>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STOCK DATA (mirrored from app) ====================
+    const STOCKS = [
+      // Common (under $50)
+      { ticker: 'SNAP',  name: 'Snap',        price: 5.53,    weight: 35, tier: 'common' },
+      { ticker: 'F',     name: 'Ford',        price: 10.50,   weight: 35, tier: 'common' },
+      { ticker: 'RIVN',  name: 'Rivian',      price: 15.06,   weight: 35, tier: 'common' },
+      { ticker: 'SOFI',  name: 'SoFi',        price: 16.96,   weight: 35, tier: 'common' },
+      { ticker: 'GME',   name: 'GameStop',    price: 22.64,   weight: 35, tier: 'common' },
+      { ticker: 'NKE',   name: 'Nike',        price: 35.51,   weight: 35, tier: 'common' },
+      // Uncommon ($50–200)
+      { ticker: 'RBLX',  name: 'Roblox',      price: 50.15,   weight: 20, tier: 'uncommon' },
+      { ticker: 'PYPL',  name: 'PayPal',      price: 52.53,   weight: 20, tier: 'uncommon' },
+      { ticker: 'NFLX',  name: 'Netflix',     price: 71.79,   weight: 20, tier: 'uncommon' },
+      { ticker: 'UBER',  name: 'Uber',        price: 77.92,   weight: 20, tier: 'uncommon' },
+      { ticker: 'SBUX',  name: 'Starbucks',   price: 95.71,   weight: 20, tier: 'uncommon' },
+      { ticker: 'DIS',   name: 'Disney',      price: 102.67,  weight: 20, tier: 'uncommon' },
+      { ticker: 'INTC',  name: 'Intel',       price: 108.60,  weight: 20, tier: 'uncommon' },
+      { ticker: 'HOOD',  name: 'Robinhood',   price: 119.82,  weight: 18, tier: 'uncommon' },
+      { ticker: 'PLTR',  name: 'Palantir',    price: 177.64,  weight: 18, tier: 'uncommon' },
+      // Rare ($200–500)
+      { ticker: 'GOOGL', name: 'Alphabet',    price: 220.50,  weight: 10, tier: 'rare' },
+      { ticker: 'NVDA',  name: 'NVIDIA',      price: 222.27,  weight: 10, tier: 'rare' },
+      { ticker: 'AMZN',  name: 'Amazon',      price: 244.39,  weight: 10, tier: 'rare' },
+      { ticker: 'COIN',  name: 'Coinbase',    price: 265.30,  weight: 10, tier: 'rare' },
+      { ticker: 'AAPL',  name: 'Apple',       price: 298.01,  weight: 10, tier: 'rare' },
+      { ticker: 'TSLA',  name: 'Tesla',       price: 364.27,  weight: 8,  tier: 'rare' },
+      { ticker: 'MSFT',  name: 'Microsoft',   price: 475.00,  weight: 8,  tier: 'rare' },
+      // Epic ($500–650)
+      { ticker: 'SPOT',  name: 'Spotify',     price: 510.97,  weight: 5,  tier: 'epic' },
+      { ticker: 'AMD',   name: 'AMD',         price: 559.82,  weight: 5,  tier: 'epic' },
+      // Legendary ($650+)
+      { ticker: 'META',  name: 'Meta',        price: 668.57,  weight: 2,  tier: 'legendary' },
+    ];
+
+    const WIN_CHANCE_3MATCH = 0.05;
+    const TIER_WIN_WEIGHTS = { common: 55, uncommon: 25, rare: 12, epic: 6, legendary: 2 };
+    const TIER_WIN_TOTAL = Object.values(TIER_WIN_WEIGHTS).reduce((a, b) => a + b, 0);
+
+    const tierClass = { common: 'tier-common', uncommon: 'tier-uncommon', rare: 'tier-rare', epic: 'tier-epic', legendary: 'tier-legendary' };
+    const oddsClass = { common: 'odds-good', uncommon: 'odds-mid', rare: 'odds-hard', epic: 'odds-rare', legendary: 'odds-legendary' };
+
+    // Compute per-stock odds
+    const tbody = document.getElementById('odds-table');
+    STOCKS.forEach(stock => {
+      const tier = stock.tier;
+      const tierChance = (TIER_WIN_WEIGHTS[tier] || 0) / TIER_WIN_TOTAL;
+      const candidates = STOCKS.filter(s => s.tier === tier);
+      const tierTotal = candidates.reduce((s, c) => s + c.weight, 0);
+      const withinTier = stock.weight / tierTotal;
+
+      const winChance = WIN_CHANCE_3MATCH * tierChance * withinTier;
+      const winOdds = winChance > 0 ? Math.round(1 / winChance) : '—';
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><span class="ticker">${stock.ticker}</span> <span class="stock-name">${stock.name}</span></td>
+        <td>$${stock.price.toFixed(2)}</td>
+        <td><span class="tier-badge ${tierClass[tier]}">${tier.toUpperCase()}</span></td>
+        <td class="${oddsClass[tier]}">${(winChance * 100).toFixed(3)}%</td>
+        <td class="${oddsClass[tier]}">1 in ${winOdds}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    // Set update date
+    document.getElementById('update-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  </script>
+</body>
+</html>

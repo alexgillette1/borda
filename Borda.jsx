@@ -1,0 +1,5214 @@
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+
+// ==================== GLOBAL STYLES ====================
+const globalStyles = `
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* ====== DARK MODE (default) — Lightspark-inspired ====== */
+  :root, [data-theme="dark"] {
+    --bg-primary: #000;
+    --bg-secondary: #141414;
+    --bg-tertiary: #1c1c1e;
+    --bg-glass: rgba(20, 20, 22, 0.88);
+    --bg-panel: #1a1a1a;
+    --green-primary: #00DC82;
+    --green-glow: rgba(0, 220, 130, 0.12);
+    --green-gradient: linear-gradient(135deg, #00DC82 0%, #00E89E 50%, #36F5B0 100%);
+    --red-primary: #FF6838;
+    --text-primary: #f0f0ee;
+    --text-secondary: #7c7c7c;
+    --text-muted: #565656;
+    --border: hsla(0, 0%, 100%, 0.08);
+    --border-hover: rgba(0, 220, 130, 0.2);
+    --glow-green: 0 0 20px rgba(0, 220, 130, 0.25), 0 0 60px rgba(0, 220, 130, 0.08);
+    --glow-green-strong: 0 0 30px rgba(0, 220, 130, 0.4), 0 0 80px rgba(0, 220, 130, 0.15);
+    --reel-bg-start: #141414;
+    --reel-bg-end: #000;
+    --reel-inner-tint: rgba(0, 220, 130, 0.03);
+    --reel-inner-shadow: rgba(0, 0, 0, 0.6);
+    --reel-fade-color: #000;
+    --badge-bg-start: #1a1a1a;
+    --badge-bg-end: #282828;
+    --badge-text: rgba(255, 255, 255, 0.95);
+    --badge-sheen: rgba(255, 255, 255, 0.1);
+    --badge-shadow: rgba(0, 0, 0, 0.5);
+    --card-hover-shadow: rgba(0, 0, 0, 0.4);
+    --modal-bg: rgba(0, 0, 0, 0.75);
+    --modal-shadow: rgba(0, 0, 0, 0.7);
+    --invert-logo: none;
+    --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+    --selection-bg: rgba(0, 220, 130, 0.2);
+    --ticker-tape-bg: rgba(0, 220, 130, 0.04);
+    --ticker-tape-border: rgba(0, 220, 130, 0.08);
+    --card-gradient-text: #000;
+    --toggle-knob: #fff;
+  }
+
+  /* ====== LIGHT MODE — Lightspark-inspired ====== */
+  [data-theme="light"] {
+    --bg-primary: #f8f8f7;
+    --bg-secondary: #fff;
+    --bg-tertiary: #f0f0ee;
+    --bg-glass: rgba(248, 248, 247, 0.88);
+    --bg-panel: #f4f4f3;
+    --green-primary: #11a967;
+    --green-glow: rgba(17, 169, 103, 0.1);
+    --green-gradient: linear-gradient(135deg, #11a967 0%, #1ccb7e 50%, #45e39e 100%);
+    --red-primary: #ef0d0d;
+    --text-primary: #1a1a1a;
+    --text-secondary: #656565;
+    --text-muted: #989898;
+    --border: rgba(0, 0, 0, 0.06);
+    --border-hover: rgba(17, 169, 103, 0.25);
+    --glow-green: 0 0 16px rgba(17, 169, 103, 0.12), 0 0 40px rgba(17, 169, 103, 0.05);
+    --glow-green-strong: 0 0 24px rgba(17, 169, 103, 0.2), 0 0 60px rgba(17, 169, 103, 0.08);
+    --reel-bg-start: #fff;
+    --reel-bg-end: #f0f0ee;
+    --reel-inner-tint: rgba(17, 169, 103, 0.03);
+    --reel-inner-shadow: rgba(0, 0, 0, 0.06);
+    --reel-fade-color: #f8f8f7;
+    --badge-bg-start: #fff;
+    --badge-bg-end: #f0f0ee;
+    --badge-text: #1a1a1a;
+    --badge-sheen: rgba(255, 255, 255, 0.6);
+    --badge-shadow: rgba(0, 0, 0, 0.08);
+    --card-hover-shadow: rgba(0, 0, 0, 0.06);
+    --modal-bg: rgba(0, 0, 0, 0.35);
+    --modal-shadow: rgba(0, 0, 0, 0.12);
+    --invert-logo: invert(0.85);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.1);
+    --selection-bg: rgba(17, 169, 103, 0.15);
+    --ticker-tape-bg: rgba(17, 169, 103, 0.04);
+    --ticker-tape-border: rgba(17, 169, 103, 0.1);
+    --card-gradient-text: #fff;
+    --toggle-knob: #fff;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    letter-spacing: -0.2px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; transition: background 0.2s; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--green-primary); }
+  ::selection { background: var(--selection-bg); color: var(--text-primary); }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  @keyframes slideInFromRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spinReel { from { transform: translateY(0); } to { transform: translateY(-100%); } }
+  @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(0, 220, 130, 0.3), 0 0 60px rgba(0, 220, 130, 0.1); opacity: 1; } 50% { box-shadow: 0 0 40px rgba(0, 220, 130, 0.5), 0 0 100px rgba(0, 220, 130, 0.2); opacity: 0.9; } }
+  @keyframes spinButtonPulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 220, 130, 0.3); } 50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 220, 130, 0.6); } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes confettiFall {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    10% { transform: translate(calc(var(--dx) * 0.3), var(--dy)) rotate(180deg); opacity: 1; }
+    100% { transform: translate(var(--dx), 80vh) rotate(720deg); opacity: 0; }
+  }
+  @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+  @keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes streakPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+  @keyframes ripple { 0% { transform: scale(0); opacity: 0.4; } 100% { transform: scale(2.5); opacity: 0; } }
+  @keyframes spinLeverPull { 0% { transform: scale(1) translateY(0); } 15% { transform: scale(0.95) translateY(3px); } 30% { transform: scale(1.08) translateY(-4px); box-shadow: 0 0 50px rgba(0, 220, 130, 0.7); } 50% { transform: scale(1.02) translateY(-1px); } 100% { transform: scale(1) translateY(0); } }
+  @keyframes winGlowPulse { 0%, 100% { box-shadow: 0 0 20px rgba(0, 220, 130, 0.2), 0 0 60px rgba(0, 220, 130, 0.08); border-color: rgba(0, 220, 130, 0.3); } 50% { box-shadow: 0 0 40px rgba(0, 220, 130, 0.5), 0 0 100px rgba(0, 220, 130, 0.2); border-color: rgba(0, 220, 130, 0.6); } }
+  @keyframes sparkle { 0% { opacity: 0; transform: scale(0) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(180deg); } 100% { opacity: 0; transform: scale(0) rotate(360deg); } }
+  @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { opacity: 1; transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
+  @keyframes spinningActive { 0% { border-color: rgba(0, 220, 130, 0.3); } 50% { border-color: rgba(255, 153, 0, 0.4); } 100% { border-color: rgba(0, 220, 130, 0.3); } }
+  @keyframes soundWave { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+  /* Accessibility: focus-visible states */
+  .btn:focus-visible { outline: 2px solid var(--green-primary); outline-offset: 2px; }
+  .btn-icon:focus-visible { outline: 2px solid var(--green-primary); outline-offset: 2px; }
+  .form-input:focus-visible { outline: 2px solid var(--green-primary); outline-offset: 1px; }
+  a:focus-visible { outline: 2px solid var(--green-primary); outline-offset: 2px; border-radius: 4px; }
+
+  /* Accessibility: respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  .app-container { display: flex; height: 100vh; width: 100%; background: var(--bg-primary); overflow: hidden; }
+  .desktop-sidebar { width: 72px; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 4px; overflow-y: auto; position: relative; z-index: 100; flex-shrink: 0; }
+  @media (max-width: 768px) { .desktop-sidebar { display: none; } }
+  .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; min-width: 0; scroll-behavior: smooth; }
+  .header-bar { height: 56px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 50; position: sticky; top: 0; flex-shrink: 0; }
+  .page-content { flex: 1; padding: 24px; width: 100%; max-width: 960px; margin: 0 auto; animation: slideUp 0.3s ease; }
+  @media (max-width: 768px) { .page-content { padding: 16px; padding-bottom: 80px; } }
+  .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: var(--bg-secondary); border-top: 1px solid var(--border); z-index: 90; padding-bottom: env(safe-area-inset-bottom); }
+  @media (max-width: 768px) { .mobile-nav { display: flex; } }
+
+  .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all 0.2s ease; }
+  .card:hover { border-color: var(--border-hover); box-shadow: 0 2px 12px var(--card-hover-shadow); }
+  .card-glow { border-color: rgba(0, 220, 130, 0.06); }
+  .card-glow:hover { border-color: rgba(0, 220, 130, 0.15); box-shadow: 0 2px 16px rgba(0, 220, 130, 0.04); }
+  .card-gradient { background: var(--green-gradient); color: var(--card-gradient-text); border: 1px solid rgba(0, 220, 130, 0.2); }
+  .card-gradient:hover { border-color: rgba(0, 220, 130, 0.4); box-shadow: 0 4px 20px rgba(0, 220, 130, 0.12); }
+  .card-interactive { cursor: pointer; }
+  .card-interactive:active { transform: scale(0.985); }
+
+  .btn { font-size: 14px; font-weight: 500; border-radius: 10px; padding: 12px 24px; border: none; cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent; touch-action: manipulation; letter-spacing: -0.1px; }
+  .btn::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.15) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; }
+  .btn:active::after { opacity: 1; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--green-gradient); color: #000; font-weight: 600; box-shadow: 0 1px 8px rgba(0, 220, 130, 0.15); }
+  .btn-primary:hover { box-shadow: 0 2px 16px rgba(0, 220, 130, 0.25); }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: hsla(0, 0%, 100%, 0.15); background: var(--bg-tertiary); }
+  .btn-ghost { background: transparent; border: none; color: var(--text-primary); }
+  .btn-ghost:hover { background: hsla(0, 0%, 100%, 0.04); }
+  .btn-large { font-size: 16px; padding: 16px 36px; width: 100%; }
+  .btn-icon { width: 44px; height: 44px; border-radius: 10px; padding: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; }
+  .btn-icon.active { background: rgba(0, 220, 130, 0.1); color: var(--green-primary); box-shadow: inset 0 0 0 1px rgba(0, 220, 130, 0.12); }
+  .btn-icon:hover:not(.active) { background: hsla(0, 0%, 100%, 0.04); }
+
+  /* Skeleton shimmer for loading states */
+  .skeleton { background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-secondary) 50%, var(--bg-tertiary) 75%); background-size: 200% 100%; animation: shimmer 1.8s ease infinite; border-radius: 8px; }
+
+  /* Tier badge colors */
+  .tier-common { color: #848E9C; }
+  .tier-uncommon { color: #4285F4; }
+  .tier-rare { color: #A855F7; }
+  .tier-epic { color: #FF9900; }
+  .tier-legendary { color: #E50914; text-shadow: 0 0 12px rgba(229, 9, 20, 0.4); }
+
+  .form-input { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text-primary); font-family: inherit; font-size: 14px; transition: all 0.15s ease; }
+  .form-input::placeholder { color: var(--text-muted); }
+  .form-input:focus { outline: none; border-color: var(--text-secondary); box-shadow: 0 0 0 3px hsla(0, 0%, 100%, 0.06); }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
+
+  .reel-machine { background: linear-gradient(180deg, var(--reel-bg-start) 0%, var(--reel-bg-end) 100%); border-radius: 24px; border: 2px solid rgba(0, 220, 130, 0.15); padding: 32px; box-shadow: 0 0 60px rgba(0, 220, 130, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 32px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+  .reel-machine::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 220, 130, 0.015) 2px, rgba(0, 220, 130, 0.015) 4px); pointer-events: none; z-index: 1; }
+  .reel-machine::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent 0%, rgba(0,220,130,0.03) 25%, transparent 50%); animation: none; pointer-events: none; z-index: 0; }
+  .reel-machine.spinning-active::after { animation: marquee 3s linear infinite; }
+  .reel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; position: relative; z-index: 2; }
+  @media (max-width: 480px) { .reel-grid { gap: 8px; } .reel-machine { padding: 16px; border-radius: 18px; } }
+  .reel { height: 300px; overflow: hidden; background: linear-gradient(180deg, var(--reel-inner-tint) 0%, var(--reel-inner-shadow) 50%, var(--reel-inner-tint) 100%); border-radius: 16px; border: 1px solid var(--border); position: relative; box-shadow: inset 0 2px 10px var(--reel-inner-shadow); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+  @media (max-width: 480px) { .reel { height: 240px; border-radius: 12px; } }
+  .reel::before, .reel::after { content: ''; position: absolute; left: 0; right: 0; height: 60px; z-index: 5; pointer-events: none; }
+  .reel::before { top: 0; background: linear-gradient(180deg, var(--reel-fade-color) 0%, transparent 100%); }
+  .reel::after { bottom: 0; background: linear-gradient(0deg, var(--reel-fade-color) 0%, transparent 100%); }
+  .reel.winning { border-color: rgba(0, 220, 130, 0.5); animation: winGlowPulse 1s ease infinite; box-shadow: inset 0 0 20px rgba(0, 220, 130, 0.15); }
+  .reel-strip { display: flex; flex-direction: column; }
+  .reel-symbol { height: 100px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 8px; }
+
+  .stock-badge { width: 80px; height: 80px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; position: relative; overflow: hidden; box-shadow: 0 4px 20px var(--badge-shadow); transition: all 0.3s ease; background: linear-gradient(135deg, var(--badge-bg-start) 0%, var(--badge-bg-end) 100%); border: 1px solid var(--border); }
+  .stock-badge::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, var(--badge-sheen) 0%, transparent 100%); border-radius: 20px 20px 0 0; }
+  .stock-badge:hover { transform: translateY(-4px); box-shadow: 0 8px 30px var(--badge-shadow), 0 0 20px var(--green-glow); }
+  .stock-logo { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+  [data-theme="light"] .stock-logo svg { filter: var(--invert-logo); }
+  .stock-ticker { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--badge-text); position: relative; z-index: 1; }
+
+  .sim-board { background: linear-gradient(180deg, var(--reel-bg-start) 0%, var(--reel-bg-end) 100%); border-radius: 24px; border: 1px solid rgba(0, 220, 130, 0.12); padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 20px 80px var(--card-hover-shadow), 0 0 40px rgba(0, 220, 130, 0.05); position: relative; }
+  .sim-reel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .sim-reel { height: 120px; overflow: hidden; background: var(--reel-inner-tint); border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative; box-shadow: inset 0 2px 8px var(--reel-inner-shadow); }
+
+  .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.15s ease; padding: 16px; }
+  .modal-content { background: var(--bg-secondary); border-radius: 16px; border: 1px solid hsla(0, 0%, 100%, 0.1); padding: 32px; max-width: 480px; width: 100%; box-shadow: 0 24px 80px var(--modal-shadow); animation: fadeInUp 0.25s ease; position: relative; overflow: hidden; max-height: 90vh; overflow-y: auto; }
+
+  .ticker-tape { background: var(--ticker-tape-bg); border-bottom: 1px solid var(--ticker-tape-border); padding: 10px 0; overflow: hidden; white-space: nowrap; }
+  .ticker-tape-inner { display: flex; gap: 40px; animation: marquee 30s linear infinite; }
+  .ticker-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; flex-shrink: 0; color: var(--text-secondary); }
+
+  .payline { position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #00DC82, transparent); z-index: 10; box-shadow: 0 0 15px rgba(0, 220, 130, 0.5); animation: pulseGlow 1s ease infinite; }
+
+  .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green-gradient); border-radius: 3px; transition: width 0.3s ease; box-shadow: var(--glow-green); }
+
+  /* FAB removed — wallet is now a nav tab */
+
+  @media (max-width: 1024px) { .reel-grid { gap: 12px; } .reel { height: 300px; } .reel-symbol { height: 100px; } }
+  @media (max-width: 768px) { .sim-board { padding: 20px; border-radius: 16px; } .reel-machine { padding: 16px; border-radius: 16px; } .reel-grid { gap: 8px; } .modal-content { padding: 24px; } .stock-badge { width: 64px; height: 64px; border-radius: 16px; } .stock-logo { width: 28px; height: 28px; } .stock-ticker { font-size: 10px; } }
+  @media (max-width: 420px) { .reel-machine { padding: 12px; } .reel-grid { gap: 6px; } .modal-content { padding: 20px; width: 100%; border-radius: 20px; } .stock-badge { width: 52px; height: 52px; border-radius: 12px; } .stock-logo { width: 22px; height: 22px; } .stock-ticker { font-size: 9px; } }
+  @media (max-width: 360px) { .modal-content { padding: 16px; } .reel-machine { padding: 10px; border-radius: 14px; } }
+`;
+
+// ==================== ALPACA MARKET DATA CONFIG ====================
+// Prices fetched via backend proxy to Alpaca Market Data API
+// Fallback: uses hardcoded reference prices if backend unavailable
+const PRICE_REFRESH_MS = 60000; // refresh every 60 seconds
+
+// ==================== STOCK DATA ====================
+// Fallback prices used until live data loads
+// Rarity tiers: weight determines probability on each reel spin.
+// Lower-priced stocks are more common, higher-priced are rarer.
+// Tier 1 (Common):    weight 35     — stocks under $50
+// Tier 2 (Uncommon):  weight 18-20  — stocks $50–200
+// Tier 3 (Rare):      weight 8-10   — stocks $200–500
+// Tier 4 (Epic):      weight 5      — stocks $500–650
+// Tier 5 (Legendary): weight 2      — stocks $650+
+const STOCKS_BASE = [
+  // ── Tier 1: Common (6 stocks) ─────────────────
+  { ticker: 'SNAP',  name: 'Snap',        color: '#FFFC00', price: 5.53,    logoType: 'snap',      weight: 35, tier: 'common' },
+  { ticker: 'F',     name: 'Ford',        color: '#003399', price: 10.50,   logoType: 'ford',      weight: 35, tier: 'common' },
+  { ticker: 'RIVN',  name: 'Rivian',      color: '#0ED181', price: 15.06,   logoType: 'rivian',    weight: 35, tier: 'common' },
+  { ticker: 'SOFI',  name: 'SoFi',        color: '#2DB8A1', price: 16.96,   logoType: 'sofi',      weight: 35, tier: 'common' },
+  { ticker: 'GME',   name: 'GameStop',    color: '#E61D2A', price: 22.64,   logoType: 'gamestop',  weight: 35, tier: 'common' },
+  { ticker: 'NKE',   name: 'Nike',        color: '#111111', price: 35.51,   logoType: 'nike',      weight: 35, tier: 'common' },
+  // ── Tier 2: Uncommon (9 stocks) ───────────────
+  { ticker: 'RBLX',  name: 'Roblox',      color: '#E2231A', price: 50.15,   logoType: 'roblox',    weight: 20, tier: 'uncommon' },
+  { ticker: 'PYPL',  name: 'PayPal',      color: '#003087', price: 52.53,   logoType: 'paypal',    weight: 20, tier: 'uncommon' },
+  { ticker: 'NFLX',  name: 'Netflix',     color: '#E50914', price: 71.79,   logoType: 'netflix',   weight: 20, tier: 'uncommon' },
+  { ticker: 'UBER',  name: 'Uber',        color: '#000000', price: 77.92,   logoType: 'uber',      weight: 20, tier: 'uncommon' },
+  { ticker: 'SBUX',  name: 'Starbucks',   color: '#006241', price: 95.71,   logoType: 'starbucks', weight: 20, tier: 'uncommon' },
+  { ticker: 'DIS',   name: 'Disney',      color: '#113CCF', price: 102.67,  logoType: 'disney',    weight: 20, tier: 'uncommon' },
+  { ticker: 'INTC',  name: 'Intel',       color: '#0071C5', price: 108.60,  logoType: 'intel',     weight: 20, tier: 'uncommon' },
+  { ticker: 'HOOD',  name: 'Robinhood',   color: '#00C805', price: 119.82,  logoType: 'robinhood', weight: 18, tier: 'uncommon' },
+  { ticker: 'PLTR',  name: 'Palantir',    color: '#101820', price: 177.64,  logoType: 'palantir',  weight: 18, tier: 'uncommon' },
+  // ── Tier 3: Rare (7 stocks) ───────────────────
+  { ticker: 'GOOGL', name: 'Alphabet',    color: '#4285F4', price: 220.50,  logoType: 'google',    weight: 10, tier: 'rare' },
+  { ticker: 'NVDA',  name: 'NVIDIA',      color: '#76B900', price: 222.27,  logoType: 'nvidia',    weight: 10, tier: 'rare' },
+  { ticker: 'AMZN',  name: 'Amazon',      color: '#FF9900', price: 244.39,  logoType: 'amazon',    weight: 10, tier: 'rare' },
+  { ticker: 'COIN',  name: 'Coinbase',    color: '#0052FF', price: 265.30,  logoType: 'coinbase',  weight: 10, tier: 'rare' },
+  { ticker: 'AAPL',  name: 'Apple',       color: '#555555', price: 298.01,  logoType: 'apple',     weight: 10, tier: 'rare' },
+  { ticker: 'TSLA',  name: 'Tesla',       color: '#CC0000', price: 364.27,  logoType: 'tesla',     weight: 8,  tier: 'rare' },
+  { ticker: 'MSFT',  name: 'Microsoft',   color: '#00A4EF', price: 475.00,  logoType: 'microsoft', weight: 8,  tier: 'rare' },
+  // ── Tier 4: Epic (2 stocks) ───────────────────
+  { ticker: 'SPOT',  name: 'Spotify',     color: '#1DB954', price: 510.97,  logoType: 'spotify',   weight: 5,  tier: 'epic' },
+  { ticker: 'AMD',   name: 'AMD',         color: '#ED1C24', price: 559.82,  logoType: 'amd',       weight: 5,  tier: 'epic' },
+  // ── Tier 5: Legendary (1 stock) ───────────────
+  { ticker: 'META',  name: 'Meta',        color: '#0668E1', price: 668.57,  logoType: 'meta',      weight: 2,  tier: 'legendary' },
+];
+
+// Weighted random selection — returns index into STOCKS array
+const TOTAL_WEIGHT = STOCKS_BASE.reduce((s, st) => s + (st.weight || 10), 0);
+const weightedRandomStock = () => {
+  let r = Math.random() * TOTAL_WEIGHT;
+  for (let i = 0; i < STOCKS.length; i++) {
+    r -= (STOCKS[i].weight || 10);
+    if (r <= 0) return i;
+  }
+  return STOCKS.length - 1;
+};
+
+// ==================== CONTROLLED WIN-RATE SYSTEM ====================
+// Each spin has a fixed probability of producing a win (3-of-a-kind only).
+// 2-of-a-kind is NOT a win. When a win occurs, the winning tier is chosen by tier weights.
+// Win = shares equal to the bet multiplier (1x = 1 share, 5x = 5 shares).
+// This gives us exact, disclosable odds for sweepstakes compliance.
+//
+// OVERALL WIN RATES (per spin):
+//   3-of-a-kind:   ~5.0%  (1 in 20) — win
+//   Loss:          ~95.0% (19 in 20)
+//
+// TIER PROBABILITIES (when a win occurs):
+//   Common:    55%  — stocks under $50
+//   Uncommon:  25%  — stocks $50–200
+//   Rare:      12%  — stocks $200–500
+//   Epic:       6%  — stocks $500–650
+//   Legendary:  2%  — stocks $650+
+//
+const WIN_CHANCE_3MATCH = 0.05;   // 5% chance of 3-of-a-kind win
+const TIER_WIN_WEIGHTS = {
+  common: 55, uncommon: 25, rare: 12, epic: 6, legendary: 2,
+};
+const TIER_WIN_TOTAL = Object.values(TIER_WIN_WEIGHTS).reduce((a, b) => a + b, 0);
+
+// Pick a winning stock index given a tier
+const pickStockByTier = (tier) => {
+  const candidates = STOCKS.map((s, i) => ({ idx: i, w: s.weight, tier: s.tier })).filter(s => s.tier === tier);
+  if (candidates.length === 0) return weightedRandomStock(); // fallback
+  const totalW = candidates.reduce((s, c) => s + c.w, 0);
+  let r = Math.random() * totalW;
+  for (const c of candidates) {
+    r -= c.w;
+    if (r <= 0) return c.idx;
+  }
+  return candidates[candidates.length - 1].idx;
+};
+
+// Roll which tier wins (when a win occurs)
+const rollWinTier = () => {
+  let r = Math.random() * TIER_WIN_TOTAL;
+  for (const [tier, w] of Object.entries(TIER_WIN_WEIGHTS)) {
+    r -= w;
+    if (r <= 0) return tier;
+  }
+  return 'common';
+};
+
+// PAYLINES for 3x3 grid (each reel shows 3 rows: top=target-1, mid=target, bot=target+1)
+// Given targets [t0, t1, t2], the 3x3 grid positions are:
+//   Row 0 (top):    [t0-1, t1-1, t2-1]  (modulo STOCKS.length)
+//   Row 1 (middle): [t0,   t1,   t2]
+//   Row 2 (bottom): [t0+1, t1+1, t2+1]  (modulo STOCKS.length)
+// Payline 1 (middle row): grid[1][0], grid[1][1], grid[1][2]
+// Payline 2 (top-left diagonal): grid[0][0], grid[1][1], grid[2][2]
+// Payline 3 (bottom-left diagonal): grid[2][0], grid[1][1], grid[0][2]
+
+const getGridSymbols = (targets) => {
+  const n = STOCKS.length;
+  return [
+    [(targets[0] - 1 + n) % n, (targets[1] - 1 + n) % n, (targets[2] - 1 + n) % n], // top row
+    [targets[0], targets[1], targets[2]], // middle row
+    [(targets[0] + 1) % n, (targets[1] + 1) % n, (targets[2] + 1) % n], // bottom row
+  ];
+};
+
+const PAYLINES = [
+  { name: 'Middle', positions: [[1,0], [1,1], [1,2]] },
+  { name: 'Diagonal ↘', positions: [[0,0], [1,1], [2,2]] },
+  { name: 'Diagonal ↗', positions: [[2,0], [1,1], [0,2]] },
+];
+
+// Check which paylines won on this grid
+const checkPaylineWins = (grid, activeLines) => {
+  const wins = [];
+  for (let i = 0; i < activeLines; i++) {
+    const line = PAYLINES[i];
+    const symbols = line.positions.map(([row, col]) => grid[row][col]);
+    if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+      wins.push({ lineIndex: i, lineName: line.name, stockIdx: symbols[0] });
+    }
+  }
+  return wins;
+};
+
+// Determine spin outcome for multi-payline slot
+// Returns { targets, wins[], grid }
+// activeLines: 1 = middle only, 3 = all paylines
+const rollSpinOutcome = (activeLines = 1) => {
+  // Each payline has an independent WIN_CHANCE_3MATCH probability
+  // We generate targets that reflect the outcomes we want
+
+  // First, decide which lines win (independently)
+  const lineWins = [];
+  for (let i = 0; i < activeLines; i++) {
+    if (Math.random() < WIN_CHANCE_3MATCH) {
+      const tier = rollWinTier();
+      const winIdx = pickStockByTier(tier);
+      lineWins.push({ lineIndex: i, winIdx });
+    }
+  }
+
+  if (lineWins.length > 0) {
+    // At least one payline wins — build targets that produce those wins
+    // Start with random non-matching targets, then force wins
+    const n = STOCKS.length;
+    let t0 = weightedRandomStock();
+    let t1, t2;
+    do { t1 = weightedRandomStock(); } while (t1 === t0);
+    do { t2 = weightedRandomStock(); } while (t2 === t0 || t2 === t1);
+    let targets = [t0, t1, t2];
+
+    // For each winning line, force the 3 positions to show the same stock
+    for (const lw of lineWins) {
+      const winIdx = lw.winIdx;
+      const line = PAYLINES[lw.lineIndex];
+      // The grid: row 0 = target-1, row 1 = target, row 2 = target+1
+      // To set grid[row][col] = winIdx, we need targets[col] + (row - 1) ≡ winIdx (mod n)
+      // So targets[col] = (winIdx - (row - 1) + n) % n
+      for (const [row, col] of line.positions) {
+        targets[col] = (winIdx - (row - 1) + n) % n;
+      }
+    }
+
+    const grid = getGridSymbols(targets);
+    const wins = checkPaylineWins(grid, activeLines);
+
+    return { targets, grid, wins, type: wins.length > 0 ? 'win' : 'loss' };
+  } else {
+    // No wins — ensure no accidental 3-match on any active payline
+    const n = STOCKS.length;
+    let attempts = 0;
+    let targets, grid;
+    do {
+      const t0 = weightedRandomStock();
+      let t1, t2;
+      do { t1 = weightedRandomStock(); } while (t1 === t0);
+      do { t2 = weightedRandomStock(); } while (t2 === t0 || t2 === t1);
+      targets = [t0, t1, t2];
+      grid = getGridSymbols(targets);
+      const accidentalWins = checkPaylineWins(grid, activeLines);
+      if (accidentalWins.length === 0) break;
+      attempts++;
+    } while (attempts < 50);
+
+    return { targets, grid, wins: [], type: 'loss' };
+  }
+};
+
+// Compute disclosed per-stock win probabilities (used on /chances page and in-app)
+const computeStockOdds = () => {
+  const odds = STOCKS.map((stock, idx) => {
+    const tier = stock.tier || 'common';
+    const tierChance = (TIER_WIN_WEIGHTS[tier] || 0) / TIER_WIN_TOTAL;
+    const candidates = STOCKS.filter(s => s.tier === tier);
+    const tierTotal = candidates.reduce((s, c) => s + c.weight, 0);
+    const withinTier = stock.weight / tierTotal;
+
+    const winChance = WIN_CHANCE_3MATCH * tierChance * withinTier;
+
+    return {
+      ticker: stock.ticker,
+      name: stock.name,
+      price: stock.price,
+      tier,
+      winOdds: winChance > 0 ? Math.round(1 / winChance) : Infinity,
+      winPct: (winChance * 100).toFixed(3),
+    };
+  });
+  return odds;
+};
+
+// Win = shares equal to the bet multiplier (1x = 1 share, 5x = 5 shares)
+// Value = shares × current stock price
+
+// Placement fee for cash-out (brokerage execution fee)
+const PLACEMENT_FEE = 0.03; // 3%
+
+// ==================== API SERVICE LAYER ====================
+// Detects if backend server is running; falls back to local-only mode
+const API_BASE = ''; // Set to e.g. 'http://localhost:3141' when running server.js
+const BordaAPI = {
+  _serverAvailable: null,
+  async checkServer() {
+    if (this._serverAvailable !== null) return this._serverAvailable;
+    try {
+      const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(2000) });
+      this._serverAvailable = res.ok;
+    } catch { this._serverAvailable = false; }
+    return this._serverAvailable;
+  },
+  // Alpaca paper trading
+  async getAlpacaAccount() {
+    if (!(await this.checkServer())) return null;
+    const res = await fetch(`${API_BASE}/api/alpaca/account`);
+    return res.ok ? res.json() : null;
+  },
+  async getAlpacaPositions() {
+    if (!(await this.checkServer())) return [];
+    const res = await fetch(`${API_BASE}/api/alpaca/positions`);
+    return res.ok ? res.json() : [];
+  },
+  async placeAlpacaOrder(order) {
+    if (!(await this.checkServer())) return { error: 'Server not connected' };
+    const res = await fetch(`${API_BASE}/api/alpaca/orders`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order),
+    });
+    return res.json();
+  },
+  // Lightspark
+  async createLightsparkCustomer(data) {
+    if (!(await this.checkServer())) return { error: 'Server not connected' };
+    const res = await fetch(`${API_BASE}/api/lightspark/customers`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  async createQuote(data) {
+    if (!(await this.checkServer())) return { error: 'Server not connected' };
+    const res = await fetch(`${API_BASE}/api/lightspark/quotes`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+};
+
+// ==================== SAVINGS & SPIN ENGINE ====================
+// $1,000 average daily balance = 1 spin per day
+// $1,000 in card spend = 1 spin
+// Stock holdings count at 2x towards daily spins (incentivize holding)
+// Stock purchases earn 5 instant bonus spins per $1K bought
+const SPIN_RATE = 1000; // dollars per spin
+const STOCK_HOLD_MULTIPLIER = 2; // stock value counts 2x towards daily spins
+const STOCK_BUY_SPIN_RATE = 5; // 5 bonus spins per $1,000 in stock purchases
+const calculateDailySpins = (averageDailyBalance, dailyCardSpend = 0, portfolioValue = 0) => {
+  const fromBalance = averageDailyBalance / SPIN_RATE;
+  const fromSpend = dailyCardSpend / SPIN_RATE;
+  const fromHoldings = (portfolioValue * STOCK_HOLD_MULTIPLIER) / SPIN_RATE;
+  return { fromBalance, fromSpend, fromHoldings, total: fromBalance + fromSpend + fromHoldings };
+};
+
+// Multiplier options for slot machine betting
+const SHARE_MULTIPLIERS = [
+  { label: '1×', value: 1, color: 'var(--text-secondary)' },
+  { label: '2×', value: 2, color: '#4285F4' },
+  { label: '3×', value: 3, color: '#FF9900' },
+  { label: '5×', value: 5, color: '#E50914' },
+];
+
+const LINE_OPTIONS = [
+  { label: '1 Line', value: 1, desc: 'Middle row' },
+  { label: '3 Lines', value: 3, desc: 'Middle + diagonals' },
+];
+
+// Mutable reference that gets updated with live prices
+let STOCKS = [...STOCKS_BASE];
+
+// Alpaca Market Data API credentials (for direct client-side fallback)
+const ALPACA_DATA_URL = 'https://data.alpaca.markets';
+const ALPACA_KEY_ID = 'PKNJQOSV6557ZBUXS4B7HW7HHG';
+const ALPACA_SECRET_KEY = 'AoBHdauh8cV59fYhTjvTS253bZu3hK3DFdyNsS5jyGwU';
+
+// Parse Alpaca snapshot data into updated stock objects
+const parseAlpacaSnapshots = (data) => {
+  return STOCKS_BASE.map((stock) => {
+    const snap = data[stock.ticker];
+    if (snap) {
+      const current = snap.latestTrade?.p || snap.minuteBar?.c || snap.dailyBar?.c || stock.price;
+      const prevClose = snap.prevDailyBar?.c || stock.price;
+      return { ...stock, price: current, prevClose };
+    }
+    return stock;
+  });
+};
+
+// Build ticker tape from stock list
+const buildTickerTape = (stocks) => stocks.map(s => {
+  const prevClose = s.prevClose || s.price;
+  const changePct = ((s.price - prevClose) / prevClose * 100);
+  const positive = changePct >= 0;
+  return {
+    ticker: `$${s.ticker}`,
+    price: s.price >= 1000 ? s.price.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : s.price.toFixed(2),
+    change: `${positive ? '+' : ''}${changePct.toFixed(2)}%`,
+    positive,
+  };
+});
+
+// Fetch all stock prices via Alpaca snapshots (single request for all symbols)
+// Strategy: try backend proxy first, then direct Alpaca API, then hardcoded fallback
+const fetchAllPrices = async () => {
+  const symbols = STOCKS_BASE.map(s => s.ticker).join(',');
+
+  // Attempt 1: Backend proxy (works when server.js is running)
+  try {
+    const res = await fetch(`/api/alpaca/snapshots?symbols=${encodeURIComponent(symbols)}`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error('Backend proxy failed');
+    const data = await res.json();
+    const updatedStocks = parseAlpacaSnapshots(data);
+    return { updatedStocks, tickerTape: buildTickerTape(updatedStocks), live: true };
+  } catch { /* fall through to direct API */ }
+
+  // Attempt 2: Direct Alpaca Market Data API (works on static hosting)
+  try {
+    const res = await fetch(
+      `${ALPACA_DATA_URL}/v2/stocks/snapshots?symbols=${encodeURIComponent(symbols)}&feed=iex`,
+      { headers: { 'APCA-API-KEY-ID': ALPACA_KEY_ID, 'APCA-API-SECRET-KEY': ALPACA_SECRET_KEY }, signal: AbortSignal.timeout(5000) }
+    );
+    if (!res.ok) throw new Error('Direct Alpaca API failed');
+    const data = await res.json();
+    const updatedStocks = parseAlpacaSnapshots(data);
+    return { updatedStocks, tickerTape: buildTickerTape(updatedStocks), live: true };
+  } catch { /* fall through to hardcoded */ }
+
+  // Attempt 3: Hardcoded reference prices
+  return { updatedStocks: [...STOCKS_BASE], tickerTape: buildTickerTape(STOCKS_BASE), live: false };
+};
+
+// Default ticker tape (used until live data loads)
+const DEFAULT_TICKER_TAPE = STOCKS_BASE.map(s => ({
+  ticker: `$${s.ticker}`,
+  price: s.price >= 1000 ? s.price.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : s.price.toFixed(2),
+  change: '+0.00%',
+  positive: true,
+}));
+
+// ==================== SOUND ENGINE (Web Audio API) ====================
+const SoundEngine = (() => {
+  let ctx = null;
+  let enabled = true;
+  try { enabled = localStorage.getItem('borda_sound') !== 'off'; } catch {}
+
+  const getCtx = () => {
+    if (!ctx) {
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; }
+    }
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  };
+
+  const play = (fn) => {
+    if (!enabled) return;
+    const c = getCtx();
+    if (!c) return;
+    try { fn(c); } catch {}
+  };
+
+  return {
+    get enabled() { return enabled; },
+    toggle(val) {
+      enabled = typeof val === 'boolean' ? val : !enabled;
+      try { localStorage.setItem('borda_sound', enabled ? 'on' : 'off'); } catch {}
+    },
+
+    // Short UI click — crisp tick
+    click() { play(c => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(1800, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(1200, c.currentTime + 0.04);
+      g.gain.setValueAtTime(0.08, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.06);
+      o.connect(g).connect(c.destination);
+      o.start(); o.stop(c.currentTime + 0.06);
+    }); },
+
+    // Navigation tap — slightly deeper
+    nav() { play(c => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'triangle'; o.frequency.setValueAtTime(800, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(600, c.currentTime + 0.06);
+      g.gain.setValueAtTime(0.06, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.08);
+      o.connect(g).connect(c.destination);
+      o.start(); o.stop(c.currentTime + 0.08);
+    }); },
+
+    // Spin start — clean lever-pull: percussive knock + gentle rising tone
+    spinStart() { play(c => {
+      const t = c.currentTime;
+      // Percussive knock (short sine burst, like tapping glass)
+      const k = c.createOscillator(), kg = c.createGain();
+      k.type = 'sine';
+      k.frequency.setValueAtTime(800, t);
+      k.frequency.exponentialRampToValueAtTime(300, t + 0.08);
+      kg.gain.setValueAtTime(0.12, t);
+      kg.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      k.connect(kg).connect(c.destination);
+      k.start(t); k.stop(t + 0.1);
+      // Gentle rising shimmer (soft sine sweep)
+      const s = c.createOscillator(), sg = c.createGain();
+      s.type = 'sine';
+      s.frequency.setValueAtTime(400, t + 0.05);
+      s.frequency.exponentialRampToValueAtTime(900, t + 0.25);
+      sg.gain.setValueAtTime(0, t + 0.05);
+      sg.gain.linearRampToValueAtTime(0.05, t + 0.1);
+      sg.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+      s.connect(sg).connect(c.destination);
+      s.start(t + 0.05); s.stop(t + 0.35);
+    }); },
+
+    // Reel spinning loop tick — mechanical clicker
+    reelTick() { play(c => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(400 + Math.random() * 200, c.currentTime);
+      g.gain.setValueAtTime(0.015, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.02);
+      o.connect(g).connect(c.destination);
+      o.start(); o.stop(c.currentTime + 0.02);
+    }); },
+
+    // Reel lock/stop — thud + click
+    reelStop(reelIndex) { play(c => {
+      const t = c.currentTime;
+      // Thud
+      const o1 = c.createOscillator(), g1 = c.createGain();
+      o1.type = 'sine';
+      o1.frequency.setValueAtTime(150 + reelIndex * 30, t);
+      o1.frequency.exponentialRampToValueAtTime(60, t + 0.1);
+      g1.gain.setValueAtTime(0.12, t);
+      g1.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      o1.connect(g1).connect(c.destination);
+      o1.start(); o1.stop(t + 0.12);
+      // Click
+      const o2 = c.createOscillator(), g2 = c.createGain();
+      o2.type = 'sine';
+      o2.frequency.setValueAtTime(2400 - reelIndex * 200, t);
+      g2.gain.setValueAtTime(0.06, t);
+      g2.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+      o2.connect(g2).connect(c.destination);
+      o2.start(); o2.stop(t + 0.04);
+    }); },
+
+    // WIN — triumphant ascending arpeggio + shimmer
+    win() { play(c => {
+      const t = c.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5 E5 G5 C6 E6
+      notes.forEach((freq, i) => {
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(freq, t + i * 0.1);
+        g.gain.setValueAtTime(0, t + i * 0.1);
+        g.gain.linearRampToValueAtTime(0.1, t + i * 0.1 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.5);
+        o.connect(g).connect(c.destination);
+        o.start(t + i * 0.1); o.stop(t + i * 0.1 + 0.5);
+      });
+      // Shimmer overtone
+      const sh = c.createOscillator(), sg = c.createGain();
+      sh.type = 'sine'; sh.frequency.setValueAtTime(3000, t + 0.3);
+      sh.frequency.exponentialRampToValueAtTime(6000, t + 0.8);
+      sg.gain.setValueAtTime(0.03, t + 0.3);
+      sg.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      sh.connect(sg).connect(c.destination);
+      sh.start(t + 0.3); sh.stop(t + 1.2);
+    }); },
+
+    // JACKPOT — extended celebration with chord + fanfare
+    jackpot() { play(c => {
+      const t = c.currentTime;
+      // Power chord stabs
+      const chords = [
+        [523.25, 659.25, 783.99],  // C major
+        [587.33, 739.99, 880.00],  // D major
+        [659.25, 830.61, 987.77],  // E major
+        [783.99, 987.77, 1174.66], // G major
+        [1046.50, 1318.51, 1567.98], // C major octave up
+      ];
+      chords.forEach((chord, ci) => {
+        chord.forEach(freq => {
+          const o = c.createOscillator(), g = c.createGain();
+          o.type = ci < 3 ? 'triangle' : 'sine';
+          o.frequency.setValueAtTime(freq, t + ci * 0.15);
+          g.gain.setValueAtTime(0, t + ci * 0.15);
+          g.gain.linearRampToValueAtTime(0.07, t + ci * 0.15 + 0.03);
+          g.gain.setValueAtTime(0.07, t + ci * 0.15 + 0.12);
+          g.gain.exponentialRampToValueAtTime(0.001, t + ci * 0.15 + 0.6);
+          o.connect(g).connect(c.destination);
+          o.start(t + ci * 0.15); o.stop(t + ci * 0.15 + 0.6);
+        });
+      });
+    }); },
+
+    // Loss — short descending tone
+    loss() { play(c => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(400, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(200, c.currentTime + 0.2);
+      g.gain.setValueAtTime(0.05, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.25);
+      o.connect(g).connect(c.destination);
+      o.start(); o.stop(c.currentTime + 0.25);
+    }); },
+
+    // Coin collect — for earning spins / depositing
+    coin() { play(c => {
+      const t = c.currentTime;
+      [1200, 1600, 2000].forEach((f, i) => {
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, t + i * 0.06);
+        g.gain.setValueAtTime(0.06, t + i * 0.06);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.06 + 0.1);
+        o.connect(g).connect(c.destination);
+        o.start(t + i * 0.06); o.stop(t + i * 0.06 + 0.1);
+      });
+    }); },
+  };
+})();
+
+// ==================== AUDIT LOG ====================
+const AUDIT_STORAGE_KEY = 'borda_audit_log';
+
+const AuditLog = {
+  _events: [],
+  _loaded: false,
+
+  _load() {
+    if (this._loaded) return;
+    try {
+      const raw = localStorage.getItem(AUDIT_STORAGE_KEY);
+      if (raw) this._events = JSON.parse(raw);
+    } catch (e) { this._events = []; }
+    this._loaded = true;
+  },
+
+  _save() {
+    try { localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(this._events)); } catch {}
+  },
+
+  log(event) {
+    this._load();
+    this._events.push({
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      timestamp: new Date().toISOString(),
+      ...event,
+    });
+    this._save();
+  },
+
+  getEvents() {
+    this._load();
+    return [...this._events];
+  },
+
+  getStats() {
+    this._load();
+    const spins = this._events.filter(e => e.type === 'spin');
+    const wins = spins.filter(e => e.matchType === 'jackpot');
+    const losses = spins.filter(e => e.matchType === 'loss');
+
+    const totalSharesWon = wins.reduce((s, e) => s + (e.shares || 0), 0);
+    const totalValueWon = wins.reduce((s, e) => s + (e.value || 0), 0);
+
+    const keptEvents = this._events.filter(e => e.type === 'win_kept');
+    const convertedEvents = this._events.filter(e => e.type === 'win_converted');
+    const sellEvents = this._events.filter(e => e.type === 'sell');
+    const cashOutEvents = this._events.filter(e => e.type === 'cash_out');
+    const purchaseEvents = this._events.filter(e => e.type === 'purchase');
+
+    const totalCashedOut = cashOutEvents.reduce((s, e) => s + (e.value || 0), 0);
+    const totalSold = sellEvents.reduce((s, e) => s + (e.value || 0), 0);
+
+    return {
+      totalSpins: spins.length,
+      totalWins: wins.length,
+      totalLosses: losses.length,
+      winRate: spins.length > 0 ? (wins.length / spins.length * 100) : 0,
+      jackpotRate: spins.length > 0 ? (wins.length / spins.length * 100) : 0,
+      lossRate: spins.length > 0 ? (losses.length / spins.length * 100) : 0,
+      totalSharesWon,
+      totalValueWon,
+      totalKept: keptEvents.length,
+      totalConverted: convertedEvents.length,
+      totalSellEvents: sellEvents.length,
+      totalCashOutEvents: cashOutEvents.length,
+      totalCashedOut,
+      totalSold,
+      totalPurchases: purchaseEvents.length,
+      // Expected probabilities
+      expectedWinRate: 5.0, // 5% chance of 3-of-a-kind
+      expectedJackpotRate: 5.0,
+      expectedLossRate: 95.0,
+    };
+  },
+
+  export() {
+    this._load();
+    return JSON.stringify({ exportedAt: new Date().toISOString(), stats: this.getStats(), events: this._events }, null, 2);
+  },
+
+  clear() {
+    this._events = [];
+    this._loaded = true;
+    this._save();
+  },
+};
+
+// ==================== STOCK LOGO COMPONENT ====================
+const StockLogo = ({ type, size = 32 }) => {
+  const s = size;
+  const logos = {
+    // Apple — bitten apple silhouette
+    apple: <svg width={s} height={s} viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76.5 0-103.7 40.8-165.9 40.8s-105.6-57.8-155.5-127.4c-58.4-81.5-105.9-207.5-105.9-327.1 0-192.8 125.3-295.3 248.4-295.3 65.5 0 120.1 43.4 161.2 43.4 39.2 0 100.2-45.9 175-45.9 28.3 0 130 2.6 197 99.3zm-234.5-180.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.7 32.5-55.4 83.7-55.4 135.6 0 7.8.6 15.6 1.3 18.2 2.6.6 6.4 1.3 10.2 1.3 45.3 0 103-30.4 139.8-71.5z"/></svg>,
+    // Google — 4-color G
+    google: <svg width={s} height={s} viewBox="0 0 48 48" fill="none"><path d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" fill="#FFC107"/><path d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" fill="#FF3D00"/><path d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0124 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" fill="#4CAF50"/><path d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 01-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" fill="#1976D2"/></svg>,
+    // Tesla — stylized T
+    tesla: <svg width={s} height={s} viewBox="0 0 32 32" fill="white"><path d="M16 7.2l-0.2 0.7c0 0-1.3-0.3-3.8-0.3-1.5 0-3.4 0.2-3.4 0.2L8.1 6.3C8.1 6.3 11 5 16 5s7.9 1.3 7.9 1.3l-0.5 1.5c0 0-1.9-0.2-3.4-0.2-2.5 0-3.8 0.3-3.8 0.3L16 7.2z M16 9.5l-1.2-0.2c0 0 0.2-0.2 1.2-0.2s1.2 0.2 1.2 0.2L16 9.5z M16 9.5L14.5 27 16 27.5 17.5 27 16 9.5z"/></svg>,
+    // Amazon — smile arrow
+    amazon: <svg width={s} height={s} viewBox="0 0 48 48" fill="none"><path d="M21.637 24.927c-3.47 2.555-8.5 3.913-12.828 3.913-.62 0-1.223-.035-1.816-.103.34.256.704.494 1.088.712C12.178 31.963 17.024 33 22 33c4.058 0 8.327-1.08 11.466-3.22l.003-.003c.66-.441 1.223-.928 1.666-1.455-1.15.695-5.27 2.718-10.135 2.718-3.38 0-5.72-1.008-6.638-2.068-.536-.62-.77-1.27-.77-1.975 0-.397.072-.78.213-1.142l.015-.038c.19-.49.497-.92.887-1.282.39-.362.85-.636 1.355-.806.506-.17 1.047-.229 1.575-.167z" fill="#FF9900"/><path d="M35 22.5c0 .18-.02.36-.05.535-.53 3.028-3.612 5.465-7.15 5.465h-.3c-4 0-7.5-2.688-7.5-6s3.5-6 7.5-6h.3c3.538 0 6.62 2.438 7.15 5.465.03.175.05.355.05.535z" fill="white"/><text x="27.5" y="25.5" textAnchor="middle" fontSize="10" fontWeight="900" fontFamily="Arial,sans-serif" fill="#232F3E">a</text></svg>,
+    // Meta — infinity loop
+    meta: <svg width={s} height={s} viewBox="0 0 48 48" fill="none"><path d="M12 14c-2.5 0-5 2.5-5 7 0 6.5 5.5 13 9.5 13 2.2 0 3.5-1.8 5-4.3L24 25.5l2.5 4.2c1.5 2.5 2.8 4.3 5 4.3 4 0 9.5-6.5 9.5-13 0-4.5-2.5-7-5-7-3 0-5.2 3-7.5 7.5L24 21l-4.5 0.5C17.2 17 15 14 12 14z" fill="#0668E1"/></svg>,
+    // Microsoft — 4-color window
+    microsoft: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="12.5" height="12.5" fill="#F25022"/><rect x="16.5" y="3" width="12.5" height="12.5" fill="#7FBA00"/><rect x="3" y="16.5" width="12.5" height="12.5" fill="#00A4EF"/><rect x="16.5" y="16.5" width="12.5" height="12.5" fill="#FFB900"/></svg>,
+    // Netflix — N ribbon
+    netflix: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><path d="M8 4h5v24h-1.5L8 14v14H5V4h3z" fill="#E50914"/><path d="M19 4h5v24h-3L17.5 14v14H15.5V4H19z" fill="#E50914"/><path d="M8 4h5l6 14V4h5v24h-5L13 14v14H8V4z" fill="#E50914"/></svg>,
+    // NVIDIA — eye shape
+    nvidia: <svg width={s} height={s} viewBox="0 0 32 32" fill="#76B900"><path d="M13 9.5v2c-4 .5-7 4-7 8s3 7.5 7 8v2.5c-5.5-.5-10-5.5-10-10.5S7.5 10 13 9.5zm2-.5c6 .5 10 5.5 10 10.5S21 29.5 15 30v-2.5c4-.5 7-4 7-8s-3-7.5-7-8V9z"/></svg>,
+    // Berkshire Hathaway — BH monogram
+    berkshire: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="3" y="5" width="26" height="22" rx="3" fill="none" stroke="white" strokeWidth="1.5"/><text x="16" y="21" textAnchor="middle" fontSize="13" fontWeight="800" fontFamily="Georgia,serif" fill="white">BH</text></svg>,
+    // Disney — castle silhouette + D
+    disney: <svg width={s} height={s} viewBox="0 0 32 32" fill="white"><path d="M16 4l-1 3h2l-1-3zm-5 3l-.5 2.5h1L11 7zm10 0l-.5 2.5h1L21 7zM8 10v4h2v-2h1v2h2v-2h1v2h2v-2h1v2h2v-2h1v2h2v-4H8zm-1 5v2h18v-2H7zm0 3v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6H7zm8 1.5c1.4 0 2.5 1.1 2.5 2.5h-5c0-1.4 1.1-2.5 2.5-2.5z"/></svg>,
+    // Starbucks — siren circle
+    starbucks: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" fill="#006241"/><circle cx="16" cy="16" r="10.5" fill="none" stroke="white" strokeWidth="0.8"/><path d="M16 7c-1.5 0-2.5 1-2.5 2 0 .7.3 1.2.8 1.7l-.3.8-2 3.5c-.3.5-.2 1 .1 1.3l1.4 1.5v3.7c0 .3.2.5.5.5h4c.3 0 .5-.2.5-.5v-3.7l1.4-1.5c.3-.3.4-.8.1-1.3l-2-3.5-.3-.8c.5-.5.8-1 .8-1.7 0-1-1-2-2.5-2z" fill="white"/></svg>,
+    // Nike — swoosh
+    nike: <svg width={s} height={s} viewBox="0 0 32 32" fill="white"><path d="M2.5 18.5c.7-1.2 2.5-3.5 5.5-5.5 2.5-1.7 5.5-3 8.5-3 2.5 0 5 .5 13.5-3.5-2.8 4.5-5.8 7.5-9.5 9.5-2.5 1.3-5 1.8-7.5 1.8-3 0-5.5-.5-7.5 0-1.3.3-2.3 1-3 .7z"/></svg>,
+    // SoFi — stylized S swoosh
+    sofi: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><path d="M8 22c2-3 5-5 8-5s6 2 8 5" stroke="#2DB8A1" strokeWidth="3" strokeLinecap="round"/><path d="M8 14c2-3 5-5 8-5s6 2 8 5" stroke="white" strokeWidth="3" strokeLinecap="round"/></svg>,
+    // Ford — classic oval
+    ford: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><ellipse cx="16" cy="16" rx="13" ry="9" fill="#003399" stroke="white" strokeWidth="1.5"/><text x="16" y="20" textAnchor="middle" fontSize="11" fontWeight="700" fontFamily="serif" fontStyle="italic" fill="white">Ford</text></svg>,
+    // Robinhood — feather
+    robinhood: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><path d="M16 4c-2 4-6 8-10 10 4-1 8 0 10 2v12c2-6 6-12 10-18-3 1-7 0-10-6z" fill="#00C805"/></svg>,
+    // Snap — ghost outline
+    snap: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><path d="M16 5c-4 0-7 3-7 7v3c-1.5.5-3 1-3 2s1 1.5 2 1.5c-.5 1.5-2 3-4 4 0 0 3 1 6 1 1 0 2.5 1 6 1s5-1 6-1c3 0 6-1 6-1-2-1-3.5-2.5-4-4 1 0 2-.5 2-1.5s-1.5-1.5-3-2v-3c0-4-3-7-7-7z" fill="#FFFC00" stroke="#333" strokeWidth="0.5"/></svg>,
+    // Palantir — geometric hexagon
+    palantir: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><polygon points="16,4 28,10 28,22 16,28 4,22 4,10" fill="none" stroke="white" strokeWidth="1.5"/><polygon points="16,9 23,13 23,21 16,25 9,21 9,13" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="0.8"/><circle cx="16" cy="17" r="3" fill="white"/></svg>,
+    // Coinbase — C with vertical stripe
+    coinbase: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" fill="#0052FF"/><path d="M13 12h6a1 1 0 011 1v6a1 1 0 01-1 1h-6a1 1 0 01-1-1v-6a1 1 0 011-1z" fill="white"/><rect x="14" y="14" width="2" height="4" rx="0.5" fill="#0052FF"/><rect x="17" y="14" width="2" height="4" rx="0.5" fill="#0052FF"/></svg>,
+    // Rivian — R lettermark
+    rivian: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="26" height="26" rx="6" fill="#0ED181"/><path d="M11 8h5c3.3 0 6 2.2 6 5 0 2-1.2 3.5-3 4.2L22 24h-3.5l-3-6H14v6h-3V8zm3 2.5v4h2c1.7 0 3-.8 3-2s-1.3-2-3-2h-2z" fill="white"/></svg>,
+    // GameStop — GS monogram
+    gamestop: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="2" y="5" width="28" height="22" rx="4" fill="#E61D2A"/><text x="16" y="21" textAnchor="middle" fontSize="12" fontWeight="900" fontFamily="Arial,sans-serif" fill="white">GS</text></svg>,
+    // Roblox — tilted square
+    roblox: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="3" fill="#E2231A" transform="rotate(2 16 16)"/><rect x="11" y="11" width="10" height="10" rx="1.5" fill="none" stroke="white" strokeWidth="2"/><rect x="14" y="18" width="3" height="3" rx="0.5" fill="white"/></svg>,
+    // PayPal — overlapping Ps
+    paypal: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><path d="M22.5 8.5C21.5 7 19.5 6 17 6h-6.5c-.5 0-1 .4-1.1.9L7 22.5c-.05.4.25.7.65.7h3.5l.9-5.5-.03.15c.1-.5.55-.9 1.08-.9h2.25c4.4 0 7.85-1.8 8.85-6.95.03-.15.05-.3.07-.45.3-1.9-.01-3.15-1.27-4.3" fill="#003087"/><path d="M24.5 12.5c-1 5.15-4.45 6.95-8.85 6.95H13.4c-.5 0-1 .4-1.08.9l-1.2 7.6c-.04.35.22.6.55.6h3.4c.45 0 .85-.35.9-.8l.8-4.7c.08-.45.5-.8.95-.8h.6c3.85 0 6.85-1.55 7.75-6.1.37-1.9.18-3.45-.87-4.55" fill="#0070E0"/></svg>,
+    // Uber — U lettermark
+    uber: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="26" height="26" rx="6" fill="#000000"/><path d="M10 11v5c0 3.3 2.7 6 6 6s6-2.7 6-6v-5h-3v5c0 1.65-1.35 3-3 3s-3-1.35-3-3v-5h-3z" fill="white"/></svg>,
+    // Intel — intel text mark
+    intel: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" fill="#0071C5"/><text x="16" y="20" textAnchor="middle" fontSize="9" fontWeight="700" fontFamily="Arial,sans-serif" fill="white">intel</text><circle cx="23" cy="9" r="1.5" fill="white"/></svg>,
+    // Spotify — sound waves circle
+    spotify: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" fill="#1DB954"/><path d="M22.5 13.5c-3.5-2-9-2.2-12.2-1.2-.5.15-1-.1-1.2-.6-.15-.5.1-1 .6-1.2 3.7-1.1 9.8-.9 13.7 1.4.45.27.6.85.35 1.3-.27.45-.85.6-1.25.3z" fill="white"/><path d="M21.5 16.5c-2.8-1.7-7.2-2.2-10.5-1.2-.45.13-.9-.1-1.05-.55-.13-.45.1-.9.55-1.05 3.8-1.15 8.6-.6 11.8 1.35.4.24.5.75.27 1.15-.24.4-.75.5-1.07.3z" fill="white"/><path d="M20.5 19.3c-2.3-1.4-5.1-1.7-8.5-1-.35.08-.7-.15-.8-.5-.08-.35.15-.7.5-.8 3.7-.8 6.9-.45 9.5 1.1.3.2.4.6.22.9-.2.3-.62.4-.92.3z" fill="white"/></svg>,
+    // AMD — stylized arrow/A
+    amd: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="4" fill="#ED1C24"/><path d="M8 24l6-16h4l6 16h-3.5l-1.2-3.5h-6.6L11.5 24H8zm5.5-6.5h5l-2.5-7-2.5 7z" fill="white"/></svg>,
+    // Bitcoin — orange circle with ₿
+    bitcoin: <svg width={s} height={s} viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" fill="#F7931A"/><path d="M21.5 14.2c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.65 2.6c-.4-.1-.85-.2-1.3-.3l.65-2.6-1.6-.4-.7 2.7c-.35-.08-.7-.16-1-.25l-2.2-.55-.45 1.7s1.2.27 1.17.29c.65.16.77.6.75.94l-.75 3.03c.04.01.1.03.17.06l-.18-.04-1.05 4.23c-.08.2-.28.49-.73.38.02.02-1.17-.3-1.17-.3L7 18.8l2.1.52c.38.1.76.2 1.13.29l-.7 2.8 1.6.4.7-2.73c.43.12.86.22 1.27.32l-.7 2.7 1.6.4.7-2.77c2.9.55 5.1.33 6-2.3.73-2.1-.04-3.32-1.56-4.12 1.1-.25 1.93-1 2.16-2.5zM19.8 17.6c-.52 2.1-4.05.96-5.2.68l.93-3.72c1.15.29 4.82.86 4.27 3.04zM20.33 14.17c-.48 1.9-3.42.94-4.37.7l.84-3.38c.96.24 4.03.69 3.53 2.68z" fill="white"/></svg>,
+  };
+  return <div className="stock-logo">{logos[type] || <span style={{fontSize: s*0.6, fontWeight: 700}}>$</span>}</div>;
+};
+
+// ==================== TICKER TAPE ====================
+const TickerTape = ({ tickerData }) => {
+  const data = tickerData || DEFAULT_TICKER_TAPE;
+  return (
+    <div className="ticker-tape">
+      <div className="ticker-tape-inner">
+        {[...data, ...data].map((item, idx) => (
+          <div key={idx} className="ticker-item">
+            <span style={{ fontWeight: 600, color: '#EAECEF' }}>{item.ticker}</span>
+            <span style={{ color: '#848E9C' }}>{item.price}</span>
+            <span style={{ color: item.positive ? '#00DC82' : '#FF6838', fontWeight: 600 }}>{item.change}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ==================== STOCK BADGE ====================
+const StockBadge = ({ ticker, name, logoType, color, size = 'medium' }) => {
+  const sizeMap = {
+    small: { badge: 60, logo: 24, ticker: '9px' },
+    medium: { badge: 80, logo: 36, ticker: '11px' },
+    large: { badge: 100, logo: 44, ticker: '12px' },
+  };
+  const dimensions = sizeMap[size];
+  return (
+    <div className="stock-badge" style={{
+      width: dimensions.badge,
+      height: dimensions.badge,
+      background: `linear-gradient(135deg, ${color}22 0%, ${color}11 100%)`,
+      borderColor: `${color}33`,
+    }}>
+      <StockLogo type={logoType} size={dimensions.logo} />
+      <div className="stock-ticker" style={{ fontSize: dimensions.ticker }}>
+        ${ticker}
+      </div>
+    </div>
+  );
+};
+
+// ==================== SIM REEL (Landing Page) ====================
+const getSimReelMetrics = () => {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+  if (w <= 420) return { cellHeight: 60, visibleSymbols: 3 };
+  if (w <= 768) return { cellHeight: 72, visibleSymbols: 3 };
+  return { cellHeight: 90, visibleSymbols: 3 };
+};
+
+const SimReel = ({ targetIndex, spinning, delay, isWinning, spinKey }) => {
+  const stripRef = useRef(null);
+  const [settled, setSettled] = useState(true);
+  const metricsRef = useRef(getSimReelMetrics());
+
+  useEffect(() => {
+    if (spinning) metricsRef.current = getSimReelMetrics();
+  }, [spinning]);
+
+  const symbols = useMemo(() => {
+    const copies = [];
+    for (let c = 0; c < 6; c++) copies.push(...STOCKS);
+    return copies;
+  }, []);
+
+  useEffect(() => {
+    if (!spinning || !stripRef.current) return;
+    setSettled(false);
+    const el = stripRef.current;
+    const { cellHeight } = metricsRef.current;
+    const landOffset = (4 * STOCKS.length + targetIndex - 1) * cellHeight;
+
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(0px)';
+    void el.offsetHeight;
+
+    setTimeout(() => {
+      el.style.transition = `transform ${1.6 + delay * 0.35}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+      el.style.transform = `translateY(-${landOffset}px)`;
+    }, delay * 400 + 50);
+
+    setTimeout(() => {
+      el.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      el.style.transform = `translateY(-${landOffset - 6}px)`;
+      setTimeout(() => {
+        el.style.transition = 'transform 0.15s ease-out';
+        el.style.transform = `translateY(-${landOffset}px)`;
+        setSettled(true);
+      }, 250);
+    }, (1.6 + delay * 0.35) * 1000 + delay * 400 + 80);
+  }, [spinning, targetIndex, delay, symbols, spinKey]);
+
+  const { cellHeight, visibleSymbols } = metricsRef.current;
+  const reelHeight = cellHeight * visibleSymbols;
+
+  return (
+    <div className={`reel ${isWinning && settled ? 'winning' : ''}`} style={{
+      height: reelHeight,
+      overflow: 'hidden',
+      background: 'linear-gradient(180deg, var(--reel-inner-tint) 0%, var(--reel-inner-shadow) 50%, var(--reel-inner-tint) 100%)',
+      borderRadius: 16,
+      border: '1px solid var(--border)',
+      position: 'relative',
+      boxShadow: 'inset 0 2px 10px var(--reel-inner-shadow)',
+    }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 50, zIndex: 5, pointerEvents: 'none', background: 'linear-gradient(180deg, var(--reel-fade-color) 0%, transparent 100%)' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 50, zIndex: 5, pointerEvents: 'none', background: 'linear-gradient(0deg, var(--reel-fade-color) 0%, transparent 100%)' }} />
+      <div ref={stripRef} style={{ display: 'flex', flexDirection: 'column', transform: 'translateY(0px)' }}>
+        {symbols.map((stock, idx) => (
+          <div key={idx} style={{ height: cellHeight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <StockBadge ticker={stock.ticker} name={stock.name} logoType={stock.logoType} color={stock.color} size="medium" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ==================== LANDING PAGE ====================
+const LandingPage = ({ onNavigate, theme, toggleTheme, tickerData }) => {
+  const [targets, setTargets] = useState([0, 4, 8]);
+  const [spinning, setSpinning] = useState(false);
+  const [spinKey, setSpinKey] = useState(0);
+  const [winResult, setWinResult] = useState(null);
+
+  const handleSimSpin = () => {
+    const t0 = Math.floor(Math.random() * STOCKS.length);
+    const t1 = Math.floor(Math.random() * STOCKS.length);
+    const t2 = Math.floor(Math.random() * STOCKS.length);
+    setTargets([t0, t1, t2]);
+    setWinResult(null);
+    setSpinning(true);
+    setSpinKey(k => k + 1);
+
+    // Resolve after reels land (longest reel: ~1.6 + 2*0.35 + 2*0.4 = 3.1s + bounce)
+    setTimeout(() => {
+      setSpinning(false);
+      if (t0 === t1 && t1 === t2) {
+        setWinResult(STOCKS[t0]);
+      }
+    }, 3600);
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+      <div style={{ position: 'absolute', top: '16px', right: '24px', zIndex: 50 }}>
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      </div>
+      <TickerTape tickerData={tickerData} />
+      <div style={{ padding: '80px 24px 60px', textAlign: 'center', background: 'linear-gradient(180deg, var(--green-glow) 0%, transparent 60%)' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '100px', background: 'rgba(0, 220, 130, 0.06)', border: '1px solid rgba(0, 220, 130, 0.12)', marginBottom: '20px', fontSize: '12px', fontWeight: 600, color: 'var(--green-primary)', letterSpacing: '0.3px' }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green-primary)', animation: 'pulseGlow 2s ease infinite' }} />
+          Save More. Spin More. Win Stocks.
+        </div>
+        <h1 style={{ fontSize: 'clamp(36px, 7vw, 64px)', fontWeight: 800, marginBottom: '16px', background: `linear-gradient(135deg, var(--text-primary) 0%, var(--green-primary) 100%)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-2px', lineHeight: 1.1, fontFamily: "'Space Grotesk', sans-serif" }}>
+          Your savings<br />win you stocks.
+        </h1>
+        <p style={{ fontSize: '17px', color: 'var(--text-secondary)', maxWidth: '480px', margin: '0 auto 32px', lineHeight: '1.7' }}>
+          Every $1,000 you save earns 1 daily spin. Hit the reels and win fractional shares of AAPL, TSLA, NFLX and more.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <button onClick={() => onNavigate('onboarding')} className="btn btn-primary" style={{ fontSize: '16px', padding: '16px 40px', fontWeight: 700 }}>
+            Start Saving & Spinning
+          </button>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No fees. No risk to your savings. No purchase necessary.</p>
+        </div>
+
+        {/* Social proof bar */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', marginTop: '40px', padding: '20px 0', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+          {[
+            { value: '50K+', label: 'Savers' },
+            { value: '$12M+', label: 'In prizes awarded' },
+            { value: '25', label: 'Stocks to win' },
+            { value: 'SIPC', label: 'Protected' },
+          ].map((stat, i) => (
+            <div key={i} style={{ textAlign: 'center', minWidth: '80px' }}>
+              <p style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>{stat.value}</p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: '60px 24px', maxWidth: '1200px', margin: '0 auto' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '40px', fontSize: '32px', fontWeight: 700 }}>Try It Now</h2>
+        <div className="sim-board">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24, position: 'relative', zIndex: 2 }}>
+            {[0, 1, 2].map((idx) => (
+              <SimReel
+                key={idx}
+                targetIndex={targets[idx]}
+                spinning={spinning}
+                delay={idx}
+                isWinning={!!winResult}
+                spinKey={spinKey}
+              />
+            ))}
+          </div>
+          <div style={{ position: 'relative' }}>
+            <div className="payline" style={{ position: 'absolute', top: '50%', left: -16, right: -16, transform: 'translateY(-50%)', zIndex: 3, pointerEvents: 'none', opacity: spinning ? 1 : 0.4 }} />
+          </div>
+          <button onClick={handleSimSpin} disabled={spinning} className="btn btn-primary" style={{ width: '100%', marginBottom: '16px', opacity: spinning ? 0.7 : 1 }}>
+            {spinning ? 'Spinning...' : 'Try Free Spin'}
+          </button>
+          {winResult && !spinning && (
+            <div style={{ textAlign: 'center', color: 'var(--green-primary)', fontSize: '18px', fontWeight: 600, padding: '16px', background: 'var(--green-glow)', borderRadius: '12px', animation: 'fadeInScale 0.3s ease' }}>
+              You won 5 shares of ${winResult.ticker}! Sign up to keep your winnings
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding: '60px 24px', maxWidth: '900px', margin: '0 auto' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '40px', fontSize: '28px', fontWeight: 700, letterSpacing: '-0.5px' }}>How It Works</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px' }}>
+          {[{ num: '1', title: 'Save', desc: 'Deposit funds into your savings account — your money is always yours' }, { num: '2', title: 'Earn Spins', desc: 'Every $1,000 saved earns 1 daily spin. Use the Borda card for even more' }, { num: '3', title: 'Win Stocks', desc: 'Match stocks on the reels and win real fractional shares to hold or cash out' }].map((step, idx) => (
+            <div key={idx} className="card" style={{ textAlign: 'center', padding: '28px 20px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--green-gradient)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 700, margin: '0 auto 14px' }}>{step.num}</div>
+              <h3 style={{ marginBottom: '6px', fontSize: '16px', fontWeight: 600 }}>{step.title}</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.5' }}>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: '24px', textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+        <p style={{ fontSize: '10px', color: 'var(--text-muted)', maxWidth: '640px', margin: '0 auto', lineHeight: '1.7', opacity: 0.8 }}>
+          NO PURCHASE NECESSARY TO ENTER OR WIN. Void where prohibited. Savings accounts provided by partner banks. Brokerage services by Alpaca Securities LLC, member FINRA/SIPC. Borda, Inc. is not a bank, broker-dealer, or investment adviser. Your savings earn sweepstakes entries; your principal is never at risk. Stock prizes involve fractional shares and all investments involve risk. Past performance does not guarantee future results.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ==================== ONBOARDING FLOW ====================
+// Signup reward reel — vertical number spinner
+const REWARD_NUMBERS = [10, 15, 20, 25, 30, 35, 40, 45, 50, 75, 100];
+const REWARD_TARGET = 8; // index of 50 in REWARD_NUMBERS
+const REWARD_CELL = 80; // px per cell
+
+const SignupRewardReel = ({ onLanded }) => {
+  const stripRef = useRef(null);
+  const [landed, setLanded] = useState(false);
+  const [showGlow, setShowGlow] = useState(false);
+
+  // Build a long strip: 5 copies then land on target in 6th copy
+  const cells = useMemo(() => {
+    const arr = [];
+    for (let c = 0; c < 6; c++) arr.push(...REWARD_NUMBERS);
+    return arr;
+  }, []);
+
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el) return;
+
+    // Start at 0
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(0px)';
+    void el.offsetHeight;
+
+    // Spin after a short pause
+    const spinTimer = setTimeout(() => {
+      const landOffset = (5 * REWARD_NUMBERS.length + REWARD_TARGET) * REWARD_CELL;
+      el.style.transition = 'transform 2.8s cubic-bezier(0.12, 0.82, 0.22, 1)';
+      el.style.transform = `translateY(-${landOffset}px)`;
+
+      // Bounce overshoot
+      setTimeout(() => {
+        el.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        el.style.transform = `translateY(-${landOffset - 6}px)`;
+        setTimeout(() => {
+          el.style.transition = 'transform 0.2s ease-out';
+          el.style.transform = `translateY(-${landOffset}px)`;
+          setLanded(true);
+          setShowGlow(true);
+          if (onLanded) onLanded(REWARD_NUMBERS[REWARD_TARGET]);
+        }, 300);
+      }, 2850);
+    }, 600);
+
+    return () => clearTimeout(spinTimer);
+  }, [onLanded]);
+
+  return (
+    <div style={{ position: 'relative', margin: '0 auto', width: '160px' }}>
+      {/* Reel window */}
+      <div style={{
+        height: REWARD_CELL, overflow: 'hidden',
+        borderRadius: '16px',
+        border: landed ? '2px solid var(--green-primary)' : '2px solid var(--border)',
+        background: 'linear-gradient(180deg, var(--reel-inner-tint), var(--reel-inner-shadow), var(--reel-inner-tint))',
+        boxShadow: showGlow ? 'var(--glow-green-strong)' : 'inset 0 2px 10px var(--reel-inner-shadow)',
+        transition: 'border-color 0.4s, box-shadow 0.6s',
+        position: 'relative',
+      }}>
+        {/* Fade edges */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '20px', background: 'linear-gradient(180deg, var(--reel-fade-color), transparent)', zIndex: 3, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '20px', background: 'linear-gradient(0deg, var(--reel-fade-color), transparent)', zIndex: 3, pointerEvents: 'none' }} />
+
+        <div ref={stripRef} style={{ transform: 'translateY(0px)' }}>
+          {cells.map((num, idx) => (
+            <div key={idx} style={{
+              height: REWARD_CELL, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '36px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif",
+              color: 'var(--text-primary)',
+            }}>
+              {num}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* "SPINS" label below */}
+      <div style={{
+        textAlign: 'center', marginTop: '12px',
+        fontSize: '13px', fontWeight: 700, letterSpacing: '3px', color: 'var(--text-secondary)',
+        opacity: landed ? 1 : 0.4, transition: 'opacity 0.5s',
+      }}>
+        FREE SPINS
+      </div>
+    </div>
+  );
+};
+
+const OnboardingFlow = ({ onNavigate, onComplete }) => {
+  const [step, setStep] = useState(0);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', dob: '', address: '' });
+  const [rewardLanded, setRewardLanded] = useState(false);
+  const [rewardAmount, setRewardAmount] = useState(0);
+  const [rewardConfetti, setRewardConfetti] = useState([]);
+
+  const steps = [
+    { title: 'Create Your Account', fields: ['name', 'email', 'password'] },
+    { title: 'Verify Your Identity', fields: ['dob', 'address'] },
+    { title: 'Connect Your Bank', fields: [] },
+    { title: 'Spin for Your Reward!', fields: [] },
+  ];
+
+  const handleRewardLanded = useCallback((amount) => {
+    setRewardAmount(amount);
+    setRewardLanded(true);
+    // Fire celebration confetti
+    const pieces = [];
+    const colors = ['#00DC82', '#00E89E', '#36F5B0', '#FFD700', '#FF6838', '#4285F4'];
+    for (let i = 0; i < 40; i++) {
+      pieces.push({
+        id: i,
+        x: 50 + (Math.random() - 0.5) * 40,
+        y: 30 + Math.random() * 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        dx: (Math.random() - 0.5) * 50,
+        dy: -(Math.random() * 30 + 15),
+        size: Math.random() * 6 + 3,
+        delay: Math.random() * 0.3,
+      });
+    }
+    setRewardConfetti(pieces);
+    setTimeout(() => setRewardConfetti([]), 3500);
+  }, []);
+
+  const handleNext = () => {
+    if (step < 3) setStep(step + 1);
+    else { onComplete(); onNavigate('dashboard'); }
+  };
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '24px', background: 'var(--bg-primary)', position: 'relative', overflow: 'hidden' }}>
+
+      {/* Reward confetti */}
+      {rewardConfetti.length > 0 && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, pointerEvents: 'none', overflow: 'hidden' }}>
+          {rewardConfetti.map(c => (
+            <div key={c.id} style={{
+              position: 'absolute', left: `${c.x}%`, top: `${c.y}%`,
+              width: c.size, height: c.size * 1.4,
+              background: c.color, borderRadius: '2px',
+              transform: `rotate(${c.rotation}deg)`,
+              animation: `confettiFall 2.5s ${c.delay}s ease-out forwards`,
+              '--dx': `${c.dx}vw`, '--dy': `${c.dy}vh`,
+            }} />
+          ))}
+        </div>
+      )}
+
+      <div style={{ maxWidth: '480px', width: '100%', position: 'relative', zIndex: 1 }}>
+        <div style={{ marginBottom: '40px' }}>
+          <div className="progress-bar"><div className="progress-fill" style={{ width: `${((step + 1) / 4) * 100}%` }} /></div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>Step {step + 1} of 4</p>
+        </div>
+
+        <div style={{ animation: 'slideInFromRight 0.3s ease' }}>
+          <h1 style={{ marginBottom: '24px', fontSize: '32px', fontWeight: 700, textAlign: step === 3 ? 'center' : 'left' }}>{steps[step].title}</h1>
+
+          {step === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {['name', 'email', 'password'].map((field) => (
+                <div key={field}>
+                  <label className="form-label">{field === 'name' ? 'Full Name' : field === 'email' ? 'Email' : 'Password'}</label>
+                  <input type={field === 'password' ? 'password' : field === 'email' ? 'email' : 'text'} className="form-input" placeholder={field === 'name' ? 'John Doe' : field === 'email' ? 'you@example.com' : '••••••••'} value={formData[field]} onChange={(e) => setFormData({...formData, [field]: e.target.value})} style={{ width: '100%' }} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {['dob', 'address'].map((field) => (
+                <div key={field}>
+                  <label className="form-label">{field === 'dob' ? 'Date of Birth' : 'Address'}</label>
+                  <input type={field === 'dob' ? 'date' : 'text'} className="form-input" placeholder={field === 'address' ? '123 Main St' : ''} value={formData[field]} onChange={(e) => setFormData({...formData, [field]: e.target.value})} style={{ width: '100%' }} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="card" style={{ background: 'rgba(0, 220, 130, 0.05)', border: '1px solid rgba(0, 220, 130, 0.2)', textAlign: 'center' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏦</div>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>Securely connect your bank</p>
+              <button className="btn btn-primary" style={{ width: '100%' }}>Connect with Plaid</button>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '16px' }}>
+                Let's see how many free spins you get...
+              </p>
+
+              <SignupRewardReel onLanded={handleRewardLanded} />
+
+              {rewardLanded && (
+                <div style={{ marginTop: '32px', animation: 'fadeInUp 0.5s ease' }}>
+                  <h2 style={{
+                    fontSize: '28px', fontWeight: 800, color: 'var(--green-primary)',
+                    fontFamily: "'Space Grotesk', sans-serif", marginBottom: '8px',
+                  }}>
+                    You won {rewardAmount} free spins!
+                  </h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                    Use them to win real stock shares
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <button onClick={handleNext} disabled={step === 3 && !rewardLanded}
+          className="btn btn-primary" style={{
+            width: '100%', marginTop: '32px', fontSize: '16px', padding: '14px',
+            opacity: step === 3 && !rewardLanded ? 0.4 : 1,
+            cursor: step === 3 && !rewardLanded ? 'default' : 'pointer',
+          }}>
+          {step === 3 ? 'Start Playing' : 'Continue'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ==================== DASHBOARD ====================
+const Dashboard = ({ portfolio, spins, cashBalance = 0, savingsBalance = 0, recentActivity, onNavigate }) => {
+  const portfolioValue = Object.values(portfolio).reduce((sum, pos) => sum + pos.currentValue, 0);
+  const totalValue = portfolioValue + cashBalance + savingsBalance;
+  const gainLoss = portfolioValue - Object.values(portfolio).reduce((sum, pos) => sum + pos.totalCost, 0);
+  const gainPercentage = Object.values(portfolio).reduce((sum, pos) => sum + pos.totalCost, 0) > 0 ? (gainLoss / Object.values(portfolio).reduce((sum, pos) => sum + pos.totalCost, 0)) * 100 : 0;
+  const dailySpinRate = calculateDailySpins(savingsBalance, 0, portfolioValue);
+
+  return (
+    <div className="page-content">
+      {/* Hero balance — Robinhood-style */}
+      <div style={{ marginBottom: '24px', padding: '24px 0 20px', animation: 'fadeInScale 0.4s ease' }}>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '6px', fontSize: '12px', fontWeight: 600, letterSpacing: '1px' }}>TOTAL VALUE</p>
+        <div style={{ fontSize: '46px', fontWeight: 800, marginBottom: '6px', color: 'var(--text-primary)', letterSpacing: '-2px', fontFamily: "'Space Grotesk', sans-serif", lineHeight: 1 }}>
+          ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '6px', fontSize: '13px', fontWeight: 600,
+            background: gainLoss >= 0 ? 'rgba(0, 220, 130, 0.08)' : 'rgba(255, 104, 56, 0.08)',
+            color: gainLoss >= 0 ? 'var(--green-primary)' : 'var(--red-primary)',
+          }}>
+            {gainLoss >= 0 ? '▲' : '▼'} {gainLoss >= 0 ? '+' : ''}{gainLoss.toFixed(2)} ({gainPercentage.toFixed(2)}%)
+          </span>
+        </div>
+        {/* Balance breakdown pills — Polymarket-style */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '11px', fontWeight: 500, padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+            Stocks ${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </span>
+          {savingsBalance > 0 && <span style={{ fontSize: '11px', fontWeight: 500, padding: '4px 10px', borderRadius: '6px', background: 'rgba(0, 220, 130, 0.06)', border: '1px solid rgba(0, 220, 130, 0.1)', color: 'var(--green-primary)' }}>
+            Savings ${savingsBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </span>}
+          {cashBalance > 0 && <span style={{ fontSize: '11px', fontWeight: 500, padding: '4px 10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}>
+            Cash ${cashBalance.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+          </span>}
+        </div>
+      </div>
+
+      {/* Action row — Kalshi-style oversized CTAs */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+        <button onClick={() => onNavigate('game')} className="btn btn-primary" style={{ padding: '16px', fontSize: '15px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '18px' }}>🎰</span> Spin ({spins})
+        </button>
+        <button onClick={() => onNavigate('wallet')} className="btn btn-secondary" style={{ padding: '16px', fontSize: '15px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '18px' }}>🏦</span> Deposit
+        </button>
+      </div>
+
+      {/* Spin earning rate — gamification streak card */}
+      <div className="card" style={{ marginBottom: '20px', padding: '14px 18px', borderRadius: '14px', background: dailySpinRate.total >= 1 ? 'rgba(255, 153, 0, 0.04)' : 'rgba(0, 220, 130, 0.03)', border: dailySpinRate.total >= 1 ? '1px solid rgba(255, 153, 0, 0.1)' : '1px solid rgba(0, 220, 130, 0.08)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '24px', animation: dailySpinRate.total >= 1 ? 'streakPulse 2s ease infinite' : 'none' }}>
+              {dailySpinRate.total >= 10 ? '🔥' : dailySpinRate.total >= 5 ? '⚡' : dailySpinRate.total >= 1 ? '✨' : '💤'}
+            </span>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                {dailySpinRate.total.toFixed(2)} spins/day
+              </p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '2px' }}>
+                {dailySpinRate.fromBalance > 0 && <span style={{ fontSize: '10px', color: 'var(--green-primary)', background: 'rgba(0,220,130,0.08)', padding: '1px 6px', borderRadius: '4px' }}>💰 {dailySpinRate.fromBalance.toFixed(1)} savings</span>}
+                {dailySpinRate.fromHoldings > 0 && <span style={{ fontSize: '10px', color: '#FF9900', background: 'rgba(255,153,0,0.08)', padding: '1px 6px', borderRadius: '4px' }}>📈 {dailySpinRate.fromHoldings.toFixed(1)} stocks (2×)</span>}
+                {dailySpinRate.total === 0 && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Save or hold stocks to earn spins</span>}
+              </div>
+            </div>
+          </div>
+          {/* Mini progress to next spin tier */}
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+              {dailySpinRate.total < 1 ? `${(dailySpinRate.total * 100).toFixed(0)}% to 1st spin` : `TIER ${Math.floor(dailySpinRate.total)}`}
+            </p>
+            <div style={{ width: '60px', height: '3px', borderRadius: '2px', background: 'var(--bg-tertiary)', marginTop: '4px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: '2px', background: dailySpinRate.total >= 1 ? '#FF9900' : 'var(--green-primary)', width: `${Math.min(100, (dailySpinRate.total % 1) * 100)}%`, transition: 'width 0.5s ease' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>HOLDINGS</h2>
+      {Object.entries(portfolio).length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '28px' }}>
+          {Object.entries(portfolio).map(([ticker, pos]) => {
+            const stock = STOCKS.find(s => s.ticker === ticker);
+            const tierColors = { common: '#848E9C', uncommon: '#4285F4', rare: '#A855F7', epic: '#FF9900', legendary: '#E50914' };
+            return (
+              <div key={ticker} className="card card-interactive" onClick={() => onNavigate('portfolio')} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <StockBadge ticker={ticker} name={stock.name} logoType={stock.logoType} color={stock.color} size="small" />
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <p style={{ fontWeight: 600, fontSize: '15px' }}>{ticker}</p>
+                      <span style={{ fontSize: '8px', fontWeight: 700, letterSpacing: '0.5px', padding: '1px 5px', borderRadius: '3px', background: `${tierColors[stock.tier] || '#848E9C'}15`, color: tierColors[stock.tier] || '#848E9C' }}>
+                        {(stock.tier || 'common').toUpperCase()}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{pos.shares.toFixed(4)} shares</p>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontWeight: 600, fontSize: '15px' }}>${pos.currentValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  {(() => {
+                    const pctChange = pos.totalCost > 0 ? ((pos.currentValue - pos.totalCost) / pos.totalCost * 100) : 0;
+                    const isUp = pctChange >= 0;
+                    return <p style={{ fontSize: '12px', color: isUp ? 'var(--green-primary)' : 'var(--red-primary)', fontWeight: 500 }}>{isUp ? '+' : ''}{pctChange.toFixed(2)}%</p>;
+                  })()}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-secondary)', borderRadius: '14px', fontSize: '14px' }}>No holdings yet. Start spinning!</div>
+      )}
+
+      <h2 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>RECENT ACTIVITY</h2>
+      {recentActivity.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {recentActivity.slice(0, 8).map((activity, idx) => {
+            const t = activity.type || 'win';
+            const isNegative = t === 'sell' || t === 'cash_out' || t === 'spin_conversion' || t === 'withdraw';
+            const colorVar = isNegative ? 'var(--red-primary)' : 'var(--green-primary)';
+            let label = '';
+            let valueLabel = '';
+            const absShares = Math.abs(activity.shares || 0);
+            if (t === 'win') {
+              label = `Won ${absShares.toFixed(4)} shares of ${activity.ticker}`;
+              valueLabel = `$${(activity.value || 0).toFixed(2)}`;
+            } else if (t === 'sell') {
+              label = `Sold ${absShares.toFixed(4)} shares of ${activity.ticker}`;
+              valueLabel = `+${Math.floor(activity.value)} spins`;
+            } else if (t === 'cash_out') {
+              label = `Cashed out ${absShares.toFixed(4)} shares of ${activity.ticker}`;
+              valueLabel = `+$${(activity.value || 0).toFixed(2)}`;
+            } else if (t === 'buy') {
+              label = `Bought ${absShares.toFixed(4)} shares of ${activity.ticker}`;
+              valueLabel = `-$${(activity.value || 0).toFixed(2)}`;
+            } else if (t === 'spin_conversion') {
+              label = `Converted ${activity.ticker} win to spins`;
+              valueLabel = `+${Math.floor(activity.value)} spins`;
+            } else if (t === 'deposit') {
+              label = activity.bonusSpins ? `Deposited +${activity.bonusSpins} bonus spin${activity.bonusSpins > 1 ? 's' : ''}` : `Deposited to savings`;
+              valueLabel = `+$${(activity.value || 0).toFixed(2)}`;
+            } else if (t === 'withdraw') {
+              label = `Withdrew from account`;
+              valueLabel = `-$${Math.abs(activity.value || 0).toFixed(2)}`;
+            }
+            return (
+              <div key={idx} className="card" style={{
+                padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                borderLeft: `3px solid ${colorVar}`, borderRadius: '14px',
+              }}>
+                <span style={{ fontSize: '13px', flex: 1, minWidth: 0 }}>{label}</span>
+                <span style={{ color: colorVar, fontWeight: 600, fontSize: '14px', flexShrink: 0, marginLeft: '8px' }}>{valueLabel}</span>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="card" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', borderRadius: '14px', fontSize: '14px' }}>No recent activity yet — spin to win!</div>
+      )}
+    </div>
+  );
+};
+
+// ==================== ANIMATED REEL COMPONENT ====================
+// Responsive reel sizing — JS must match CSS for scroll math
+const getReelMetrics = () => {
+  const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+  if (w <= 420) return { symbolHeight: 65, visibleSymbols: 3 };
+  if (w <= 768) return { symbolHeight: 80, visibleSymbols: 3 };
+  return { symbolHeight: 100, visibleSymbols: 3 };
+};
+
+const AnimatedReel = ({ targetIndex, spinning, delay, isWinning, reelKey }) => {
+  const stripRef = useRef(null);
+  const [settled, setSettled] = useState(true);
+  const metricsRef = useRef(getReelMetrics());
+
+  // Refresh metrics on spin start (catches orientation changes)
+  useEffect(() => {
+    if (spinning) metricsRef.current = getReelMetrics();
+  }, [spinning]);
+
+  // Build a long strip: 5 full copies of stocks for scrolling, then land on target
+  const symbols = useMemo(() => {
+    const copies = [];
+    for (let c = 0; c < 6; c++) copies.push(...STOCKS);
+    return copies;
+  }, []);
+
+  useEffect(() => {
+    if (!spinning || !stripRef.current) return;
+    setSettled(false);
+
+    const { symbolHeight } = metricsRef.current;
+    const el = stripRef.current;
+    // Land so that targetIndex is in the center row (row 2 of 3)
+    const landOffset = (4 * STOCKS.length + targetIndex - 1) * symbolHeight;
+    // Start position: 0 (top)
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(0px)';
+
+    // Force reflow
+    void el.offsetHeight;
+
+    // Spin: fast at first, then ease out to land with a slight overshoot bounce
+    setTimeout(() => {
+      el.style.transition = `transform ${1.8 + delay * 0.3}s cubic-bezier(0.15, 0.85, 0.25, 1)`;
+      el.style.transform = `translateY(-${landOffset}px)`;
+    }, delay * 500 + 50);
+
+    // Bounce overshoot: after main spin completes, do a small bounce
+    setTimeout(() => {
+      SoundEngine.reelStop(delay);
+      el.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      el.style.transform = `translateY(-${landOffset - 6}px)`;
+      setTimeout(() => {
+        el.style.transition = 'transform 0.15s ease-out';
+        el.style.transform = `translateY(-${landOffset}px)`;
+        setSettled(true);
+      }, 250);
+    }, (1.8 + delay * 0.3) * 1000 + delay * 500 + 80);
+  }, [spinning, targetIndex, delay, symbols, reelKey]);
+
+  const { symbolHeight, visibleSymbols } = metricsRef.current;
+  const reelHeight = symbolHeight * visibleSymbols;
+
+  return (
+    <div style={{ perspective: '800px' }}>
+      <div className={`reel ${isWinning && settled ? 'winning' : ''}`} style={{ height: reelHeight }}>
+        <div ref={stripRef} className="reel-strip" style={{ transform: 'translateY(0px)' }}>
+          {symbols.map((stock, idx) => (
+            <div key={idx} className="reel-symbol" style={{ height: symbolHeight }}>
+              <StockBadge ticker={stock.ticker} name={stock.name} logoType={stock.logoType} color={stock.color} size="medium" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==================== SLOT MACHINE ====================
+const SlotMachineGame = ({ portfolio, spins, onAddWin, onUpdateSpins, onConvertToSpins, onCashOutWin }) => {
+  const [lines, setLines] = useState(1); // 1 = middle only, 3 = all paylines
+  const [multiplier, setMultiplier] = useState(1); // shares per winning line
+  const [spinning, setSpinning] = useState(false);
+  const [targets, setTargets] = useState([0, 3, 7]); // initial display
+  const [winningReels, setWinningReels] = useState([]);
+  const [winningLines, setWinningLines] = useState([]); // which payline indices won
+  const [showWinModal, setShowWinModal] = useState(false);
+  const [winData, setWinData] = useState(null);
+  const [spinHistory, setSpinHistory] = useState([]);
+  const [spinKey, setSpinKey] = useState(0); // increment to force reel re-animation
+  const [showPayout, setShowPayout] = useState(false);
+  const [payoutValue, setPayoutValue] = useState(0);
+  const [screenFlash, setScreenFlash] = useState(null); // 'green' or 'red' or null
+  const [confetti, setConfetti] = useState([]);
+
+  const spinCost = lines * multiplier; // total spins consumed per pull
+
+  // Create confetti burst
+  const fireConfetti = useCallback(() => {
+    const pieces = [];
+    const colors = ['#00DC82', '#00E89E', '#36F5B0', '#FFD700', '#FF6838', '#4285F4', '#E50914', '#76B900'];
+    for (let i = 0; i < 60; i++) {
+      pieces.push({
+        id: i,
+        x: 50 + (Math.random() - 0.5) * 30,
+        y: 40 + Math.random() * 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        dx: (Math.random() - 0.5) * 60,
+        dy: -(Math.random() * 40 + 20),
+        size: Math.random() * 8 + 4,
+        delay: Math.random() * 0.3,
+      });
+    }
+    setConfetti(pieces);
+    setTimeout(() => setConfetti([]), 3000);
+  }, []);
+
+  const totalDuration = 3200; // ms for last reel to settle (including bounce)
+
+  const handleSpin = useCallback(() => {
+    if (spinning || spins < spinCost) return;
+    // Haptic + sound feedback
+    if (navigator.vibrate) navigator.vibrate([40, 20, 60]);
+    SoundEngine.spinStart();
+    setSpinning(true);
+    setWinningReels([]);
+    setWinningLines([]);
+    setShowPayout(false);
+    setScreenFlash(null);
+    onUpdateSpins(-spinCost);
+    setSpinKey(k => k + 1);
+
+    // Roll outcome using controlled win-rate system with active paylines
+    const outcome = rollSpinOutcome(lines);
+    const newTargets = outcome.targets;
+    setTargets(newTargets);
+
+    // After all reels settle, apply outcome
+    setTimeout(() => {
+      if (outcome.wins.length > 0) {
+        // WIN — at least one payline hit 3-of-a-kind
+        // Total shares = winning lines × multiplier
+        // If multiple lines win different stocks, combine them
+        const winsByStock = {};
+        for (const w of outcome.wins) {
+          const stock = STOCKS[w.stockIdx];
+          if (!winsByStock[stock.ticker]) {
+            winsByStock[stock.ticker] = { stock, lineCount: 0, lineNames: [] };
+          }
+          winsByStock[stock.ticker].lineCount++;
+          winsByStock[stock.ticker].lineNames.push(w.lineName);
+        }
+
+        // For simplicity, use the first (or highest-value) winning stock as the primary win
+        const primaryTicker = Object.keys(winsByStock).sort((a, b) => {
+          const sa = STOCKS.find(s => s.ticker === a);
+          const sb = STOCKS.find(s => s.ticker === b);
+          return (sb?.price || 0) - (sa?.price || 0);
+        })[0];
+        const primary = winsByStock[primaryTicker];
+        const totalWinLines = outcome.wins.length;
+        const shares = totalWinLines * multiplier;
+        const value = shares * primary.stock.price;
+
+        setWinningReels([0, 1, 2]);
+        setWinningLines(outcome.wins.map(w => w.lineIndex));
+        setScreenFlash('green');
+        fireConfetti();
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+        // Sound: jackpot for multi-line or high multiplier, regular win otherwise
+        if (totalWinLines > 1 || multiplier >= 3) SoundEngine.jackpot();
+        else SoundEngine.win();
+
+        setShowPayout(true);
+        setPayoutValue(value);
+
+        setTimeout(() => {
+          setWinData({
+            ticker: primary.stock.ticker, shares, value,
+            price: primary.stock.price, name: primary.stock.name, tier: primary.stock.tier,
+            linesWon: totalWinLines, lineNames: outcome.wins.map(w => w.lineName),
+          });
+          setShowWinModal(true);
+          setShowPayout(false);
+          setScreenFlash(null);
+        }, 2200);
+
+        setSpinHistory(prev => [{ ticker: primary.stock.ticker, result: 'WIN', shares, value }, ...prev.slice(0, 9)]);
+        AuditLog.log({ type: 'spin', matchType: 'jackpot', ticker: primary.stock.ticker, shares, value, lines, multiplier, cost: spinCost, linesWon: totalWinLines, reelResults: [...newTargets], priceAtTime: primary.stock.price });
+      } else {
+        // Loss — no paylines matched
+        const stock = STOCKS[newTargets[0]];
+        SoundEngine.loss();
+        setScreenFlash('red');
+        setTimeout(() => setScreenFlash(null), 600);
+        setSpinHistory(prev => [{ ticker: stock.ticker, result: 'LOSS', shares: 0, value: 0 }, ...prev.slice(0, 9)]);
+        AuditLog.log({ type: 'spin', matchType: 'loss', ticker: stock.ticker, shares: 0, value: 0, lines, multiplier, cost: spinCost, reelResults: [...newTargets], priceAtTime: stock.price });
+      }
+
+      setSpinning(false);
+    }, totalDuration);
+  }, [spinning, spins, spinCost, lines, multiplier, onUpdateSpins, fireConfetti]);
+
+  const handleKeepShares = () => {
+    if (winData) {
+      onAddWin(winData.ticker, winData.shares, winData.value);
+      AuditLog.log({ type: 'win_kept', ticker: winData.ticker, shares: winData.shares, value: winData.value, priceAtTime: winData.price });
+      setShowWinModal(false); setWinningReels([]);
+    }
+  };
+  const handleConvertToSpins = () => {
+    if (winData) {
+      const spinsGained = Math.floor(winData.value);
+      if (onConvertToSpins) {
+        onConvertToSpins(winData.ticker, winData.shares, winData.value, spinsGained);
+      } else {
+        onUpdateSpins(spinsGained);
+      }
+      AuditLog.log({ type: 'win_converted', ticker: winData.ticker, shares: winData.shares, value: winData.value, spinsGained, priceAtTime: winData.price });
+      setShowWinModal(false); setWinningReels([]);
+    }
+  };
+
+  return (
+    <div className="page-content" style={{ position: 'relative' }}>
+      {/* Screen flash overlay */}
+      {screenFlash && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 40, pointerEvents: 'none',
+          background: screenFlash === 'green' ? 'rgba(0, 220, 130, 0.12)' : 'rgba(255, 104, 56, 0.1)',
+          animation: 'fadeIn 0.15s ease',
+        }} />
+      )}
+
+      {/* Confetti overlay */}
+      {confetti.length > 0 && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 45, pointerEvents: 'none', overflow: 'hidden' }}>
+          {confetti.map(c => (
+            <div key={c.id} style={{
+              position: 'absolute',
+              left: `${c.x}%`, top: `${c.y}%`,
+              width: c.size, height: c.size * 1.4,
+              background: c.color, borderRadius: '2px',
+              transform: `rotate(${c.rotation}deg)`,
+              animation: `confettiFall 2.5s ${c.delay}s ease-out forwards`,
+              '--dx': `${c.dx}vw`, '--dy': `${c.dy}vh`,
+            }} />
+          ))}
+        </div>
+      )}
+
+      {/* Stats bar */}
+      <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+        <div className="card" style={{ textAlign: 'center', padding: '14px 8px', borderRadius: '14px', background: 'linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 600, letterSpacing: '1px', marginBottom: '6px' }}>SPINS</p>
+          <p style={{ fontSize: '28px', fontWeight: 800, color: spins < spinCost ? 'var(--red-primary)' : 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif", transition: 'color 0.3s', lineHeight: 1 }}>{spins}</p>
+        </div>
+        <div className="card" style={{ textAlign: 'center', padding: '14px 8px', borderRadius: '14px', background: 'linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 600, letterSpacing: '1px', marginBottom: '6px' }}>COST</p>
+          <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: '#FF9900', lineHeight: 1 }}>{spinCost}</p>
+        </div>
+        <div className="card" style={{ textAlign: 'center', padding: '14px 8px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(0,220,130,0.06) 0%, var(--bg-secondary) 100%)', border: '1px solid rgba(0,220,130,0.12)' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: 600, letterSpacing: '1px', marginBottom: '6px' }}>WIN</p>
+          <p style={{ fontSize: '22px', fontWeight: 800, color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif", lineHeight: 1 }}>{multiplier * lines} <span style={{ fontSize: '12px', fontWeight: 600, opacity: 0.7 }}>share{multiplier * lines !== 1 ? 's' : ''}</span></p>
+        </div>
+      </div>
+
+      {/* Reel machine */}
+      <div className={`reel-machine ${spinning ? 'spinning-active' : ''}`} style={{ marginBottom: '32px' }}>
+        {/* Payline indicators */}
+        {/* Middle line (always shown) */}
+        <div className="payline" style={{ top: '50%', marginTop: '-1.5px', opacity: winningLines.includes(0) ? 1 : lines >= 1 ? 0.3 : 0.1 }} />
+        {/* Diagonal paylines (shown when 3 lines active) */}
+        {lines === 3 && (
+          <>
+            <svg style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none', width: '100%', height: '100%' }}>
+              {/* Top-left to bottom-right diagonal */}
+              <line x1="0" y1="16%" x2="100%" y2="84%" stroke="var(--green-primary)" strokeWidth="2" strokeDasharray={winningLines.includes(1) ? 'none' : '6,4'} opacity={winningLines.includes(1) ? 0.9 : 0.25} />
+              {/* Bottom-left to top-right diagonal */}
+              <line x1="0" y1="84%" x2="100%" y2="16%" stroke="#FF9900" strokeWidth="2" strokeDasharray={winningLines.includes(2) ? 'none' : '6,4'} opacity={winningLines.includes(2) ? 0.9 : 0.25} />
+            </svg>
+          </>
+        )}
+
+        <div className="reel-grid">
+          {[0, 1, 2].map(i => (
+            <AnimatedReel
+              key={i}
+              targetIndex={targets[i]}
+              spinning={spinning}
+              delay={i}
+              isWinning={winningReels.includes(i)}
+              reelKey={spinKey}
+            />
+          ))}
+        </div>
+
+        {/* Payout celebration overlay */}
+        {showPayout && (
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 20,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(8px)',
+            borderRadius: '24px', animation: 'fadeIn 0.2s ease',
+          }}>
+            <div style={{ textAlign: 'center', animation: 'bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+              <div style={{ fontSize: '16px', color: 'var(--green-primary)', fontWeight: 700, letterSpacing: '4px', marginBottom: '12px', textTransform: 'uppercase' }}>
+                {winningLines.length > 1 ? `${winningLines.length} LINES WIN!` : 'WINNER'}
+              </div>
+              <div style={{
+                fontSize: '64px', fontWeight: 800, color: '#fff',
+                fontFamily: "'Space Grotesk', sans-serif",
+                textShadow: '0 0 40px rgba(0, 220, 130, 0.6), 0 0 80px rgba(0, 220, 130, 0.3)',
+                animation: 'pulseGlow 0.8s ease infinite',
+                lineHeight: 1,
+              }}>
+                ${payoutValue.toFixed(2)}
+              </div>
+              <div style={{ marginTop: '12px', display: 'inline-flex', gap: '6px' }}>
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} style={{ fontSize: '20px', animation: `sparkle 1s ${i * 0.15}s ease infinite` }}>✦</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Control panel — paylines + multiplier */}
+      <div className="card" style={{ marginBottom: '24px', padding: '20px', borderRadius: '18px', background: 'linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)' }}>
+        {/* Payline selector */}
+        <div style={{ marginBottom: '16px' }}>
+          <p style={{ marginBottom: '8px', fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '1.5px' }}>PAYLINES</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+            {LINE_OPTIONS.map((lo) => (
+              <button key={lo.value} onClick={() => { if (!spinning) { SoundEngine.click(); setLines(lo.value); } }} style={{
+                width: '100%', padding: '12px 10px', fontSize: '14px', fontWeight: 700,
+                borderRadius: '12px', border: `2px solid ${lines === lo.value ? 'var(--green-primary)' : 'var(--border)'}`,
+                background: lines === lo.value ? 'rgba(0,220,130,0.1)' : 'var(--bg-primary)',
+                color: lines === lo.value ? 'var(--green-primary)' : 'var(--text-primary)',
+                cursor: spinning ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                boxShadow: lines === lo.value ? '0 0 16px rgba(0,220,130,0.15)' : 'none',
+              }}>
+                <span style={{ fontWeight: 800, fontSize: '15px', display: 'block' }}>{lo.label}</span>
+                <span style={{ display: 'block', fontSize: '10px', fontWeight: 500, opacity: 0.6, marginTop: '2px' }}>{lo.desc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Share multiplier controls */}
+        <div>
+          <p style={{ marginBottom: '8px', fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '1.5px' }}>SHARES PER WIN</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+            {SHARE_MULTIPLIERS.map((m) => (
+              <button key={m.value} onClick={() => { if (!spinning) { SoundEngine.click(); setMultiplier(m.value); } }} style={{
+                width: '100%', padding: '12px 6px', fontWeight: 700,
+                borderRadius: '12px', border: `2px solid ${multiplier === m.value ? m.color : 'var(--border)'}`,
+                background: multiplier === m.value ? `${m.color}15` : 'var(--bg-primary)',
+                color: multiplier === m.value ? m.color : 'var(--text-primary)',
+                cursor: spinning ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                boxShadow: multiplier === m.value ? `0 0 16px ${m.color}25` : 'none',
+              }}>
+                <span style={{ fontSize: '18px', fontWeight: 800, display: 'block', fontFamily: "'Space Grotesk', sans-serif" }}>{m.label}</span>
+                <span style={{ display: 'block', fontSize: '9px', fontWeight: 600, opacity: 0.6, marginTop: '2px', letterSpacing: '0.3px' }}>
+                  {m.value} {m.value === 1 ? 'SHARE' : 'SHARES'}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* SPIN button */}
+      <button onClick={handleSpin} disabled={spinning || spins < spinCost} className="btn btn-primary" style={{
+        width: '100%', fontSize: '20px', padding: '18px 16px', fontWeight: 800,
+        letterSpacing: '3px', fontFamily: "'Space Grotesk', sans-serif",
+        animation: spinning ? 'spinningActive 1s ease infinite' : (spins >= spinCost ? 'spinButtonPulse 2s ease infinite' : 'none'),
+        opacity: spinning || spins < spinCost ? 0.5 : 1,
+        cursor: spinning || spins < spinCost ? 'not-allowed' : 'pointer',
+        marginBottom: '24px', WebkitTapHighlightColor: 'transparent',
+        borderRadius: '16px', position: 'relative', overflow: 'hidden',
+        textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+      }}>
+        {spinning ? (
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span style={{ display: 'inline-flex', gap: '3px' }}>
+              {[0.1, 0.2, 0.3].map((d, i) => (
+                <span key={i} style={{ width: '4px', height: '16px', background: 'currentColor', borderRadius: '2px', animation: `soundWave 0.6s ${d}s ease infinite` }} />
+              ))}
+            </span>
+            SPINNING
+            <span style={{ display: 'inline-flex', gap: '3px' }}>
+              {[0.15, 0.25, 0.35].map((d, i) => (
+                <span key={i} style={{ width: '4px', height: '16px', background: 'currentColor', borderRadius: '2px', animation: `soundWave 0.6s ${d}s ease infinite` }} />
+              ))}
+            </span>
+          </span>
+        ) : (
+          <span>SPIN ({spinCost} {spinCost === 1 ? 'spin' : 'spins'})</span>
+        )}
+      </button>
+
+      {/* Recent spins */}
+      {spinHistory.length > 0 && (
+        <div className="card" style={{ padding: '16px', borderRadius: '16px' }}>
+          <h3 style={{ marginBottom: '12px', fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '1.5px' }}>RECENT SPINS</h3>
+          <div style={{ display: 'grid', gap: '6px' }}>
+            {spinHistory.slice(0, 6).map((spin, idx) => (
+              <div key={idx} style={{
+                padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: spin.result === 'WIN' ? 'rgba(0, 220, 130, 0.06)' : 'var(--bg-primary)',
+                borderRadius: '10px', border: '1px solid var(--border)',
+                borderLeft: `3px solid ${spin.result === 'WIN' ? 'var(--green-primary)' : 'var(--red-primary)'}`,
+                animation: idx === 0 ? 'slideUp 0.3s ease' : 'none',
+              }}>
+                <span style={{ fontSize: '13px', fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif" }}>${spin.ticker}</span>
+                <span style={{ fontSize: '12px', color: spin.result === 'WIN' ? 'var(--green-primary)' : 'var(--red-primary)', fontWeight: 600 }}>
+                  {spin.result === 'WIN' ? `+${spin.shares} shares · $${spin.value.toFixed(0)}` : 'No match'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Win modal */}
+      {showWinModal && winData && (
+        <div className="modal-overlay">
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ animation: 'bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
+            {/* Sparkle decorations */}
+            {[...Array(6)].map((_, i) => (
+              <div key={i} style={{
+                position: 'absolute', width: '8px', height: '8px', borderRadius: '50%',
+                background: ['#FFD700', '#00DC82', '#FF6838', '#4285F4', '#E50914', '#76B900'][i],
+                top: `${10 + Math.random() * 20}%`, left: `${10 + (i * 15)}%`,
+                animation: `sparkle ${1 + Math.random()}s ${i * 0.2}s ease infinite`,
+                pointerEvents: 'none',
+              }} />
+            ))}
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{
+                width: '110px', height: '110px', borderRadius: '32px', margin: '0 auto 20px',
+                background: `linear-gradient(135deg, ${STOCKS.find(s => s.ticker === winData.ticker)?.color}33, ${STOCKS.find(s => s.ticker === winData.ticker)?.color}11)`,
+                border: `2px solid ${STOCKS.find(s => s.ticker === winData.ticker)?.color}55`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                animation: 'winGlowPulse 1.5s ease infinite',
+                boxShadow: `0 0 40px ${STOCKS.find(s => s.ticker === winData.ticker)?.color}22`,
+              }}>
+                <StockLogo type={STOCKS.find(s => s.ticker === winData.ticker)?.logoType} size={52} />
+              </div>
+              <h2 style={{ fontSize: '30px', fontWeight: 800, color: 'var(--green-primary)', marginBottom: '4px', fontFamily: "'Space Grotesk', sans-serif", animation: 'countUp 0.4s ease', textShadow: '0 0 20px rgba(0, 220, 130, 0.3)' }}>
+                {winData.linesWon > 1 ? `${winData.linesWon} Lines Win!` : 'You Won!'}
+              </h2>
+              <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                {winData.shares} {winData.shares === 1 ? 'share' : 'shares'} of ${winData.ticker}
+              </p>
+              {winData.lineNames && winData.lineNames.length > 0 && (
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '24px' }}>
+                  {winData.lineNames.join(' + ')}
+                </p>
+              )}
+              <div style={{
+                background: 'var(--green-glow)', border: '1px solid rgba(0, 220, 130, 0.2)',
+                borderRadius: '16px', padding: '20px', marginBottom: '24px',
+              }}>
+                <p style={{ fontSize: '11px', fontWeight: 500, color: 'var(--text-secondary)', letterSpacing: '0.5px', marginBottom: '8px' }}>TOTAL VALUE</p>
+                <p style={{ fontSize: '36px', fontWeight: 800, color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                  ${winData.value.toFixed(2)}
+                </p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '6px' }}>
+                  {winData.shares} {winData.shares === 1 ? 'share' : 'shares'} × ${winData.price.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              <button onClick={() => { SoundEngine.coin(); handleKeepShares(); }} className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+                Hold Shares in Portfolio
+              </button>
+              <button onClick={() => {
+                if (winData) {
+                  const cashValue = winData.value * (1 - PLACEMENT_FEE);
+                  const feeAmount = winData.value * PLACEMENT_FEE;
+                  if (onCashOutWin) {
+                    onCashOutWin(winData.ticker, winData.shares, cashValue, feeAmount);
+                  }
+                  setShowWinModal(false); setWinningReels([]);
+                }
+              }} className="btn btn-secondary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+                <span>Cash Out ${(winData.value * (1 - PLACEMENT_FEE)).toFixed(2)}</span>
+                <span style={{ display: 'block', fontSize: '10px', opacity: 0.6, marginTop: '2px' }}>
+                  3% placement fee (−${(winData.value * PLACEMENT_FEE).toFixed(2)})
+                </span>
+              </button>
+              <button onClick={handleConvertToSpins} className="btn btn-ghost" style={{ width: '100%', padding: '12px', fontSize: '15px' }}>
+                Convert to {Math.floor(winData.value).toLocaleString()} Spins
+              </button>
+              <button onClick={() => {
+                const text = `I just won ${winData.shares} shares of $${winData.ticker} worth $${winData.value.toFixed(2)} on Borda! Save money, spin the reels, win real stocks.`;
+                if (navigator.share) { navigator.share({ title: 'I won on Borda!', text, url: 'https://playborda.com' }).catch(() => {}); }
+                else { navigator.clipboard?.writeText(text + ' https://playborda.com'); }
+              }} className="btn" style={{ width: '100%', padding: '12px', fontSize: '15px', background: 'transparent', border: '1px dashed var(--border)', color: 'var(--text-secondary)' }}>
+                Share Win
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==================== SIMULATED STOCK CHANGES ====================
+// Seeded pseudo-random change data per stock (consistent across renders)
+const STOCK_CHANGES = {
+  AAPL: { day: 1.24, week: 3.45, month: 5.82, quarter: 12.4 },
+  GOOGL: { day: -0.87, week: 2.11, month: 4.56, quarter: 8.9 },
+  TSLA: { day: 2.31, week: -1.45, month: 8.73, quarter: -5.2 },
+  AMZN: { day: 0.56, week: 1.89, month: 3.21, quarter: 11.7 },
+  META: { day: -1.12, week: 4.23, month: 7.45, quarter: 15.3 },
+  MSFT: { day: 0.32, week: 1.56, month: 2.89, quarter: 9.1 },
+  NFLX: { day: 1.78, week: -0.34, month: 6.12, quarter: 18.6 },
+  NVDA: { day: -2.45, week: 5.67, month: 11.34, quarter: 24.8 },
+  DIS: { day: -0.78, week: -1.23, month: -2.45, quarter: -4.1 },
+  SBUX: { day: 0.43, week: 1.12, month: 2.34, quarter: 6.7 },
+  NKE: { day: -1.56, week: -2.34, month: -3.78, quarter: -8.9 },
+  SOFI: { day: 3.12, week: 5.45, month: 9.21, quarter: 22.3 },
+  F: { day: -0.34, week: 0.78, month: -1.45, quarter: -3.2 },
+  HOOD: { day: 2.67, week: 4.89, month: 12.34, quarter: 28.7 },
+  SNAP: { day: -1.89, week: -3.12, month: -5.67, quarter: -12.4 },
+  PLTR: { day: 1.45, week: 6.78, month: 14.56, quarter: 32.1 },
+  COIN: { day: -3.21, week: 2.34, month: 8.91, quarter: 19.5 },
+};
+
+// Generate chart points for a stock over a time range
+const generateChartPoints = (basePrice, changePct, numPoints) => {
+  const points = [];
+  const endPrice = basePrice;
+  const startPrice = basePrice / (1 + changePct / 100);
+  for (let i = 0; i < numPoints; i++) {
+    const progress = i / (numPoints - 1);
+    const trend = startPrice + (endPrice - startPrice) * progress;
+    const noise = trend * (Math.sin(i * 2.7 + basePrice) * 0.015 + Math.cos(i * 1.3 + basePrice * 0.5) * 0.01);
+    points.push(Math.max(0, trend + noise));
+  }
+  return points;
+};
+
+// Generate portfolio-level chart points
+const generatePortfolioChart = (portfolio, timePeriod) => {
+  const periodMap = { '1D': 'day', '1W': 'week', '1M': 'month', '3M': 'quarter', 'ALL': 'quarter' };
+  const pointsMap = { '1D': 24, '1W': 7, '1M': 30, '3M': 90, 'ALL': 120 };
+  const period = periodMap[timePeriod] || 'month';
+  const numPoints = pointsMap[timePeriod] || 30;
+
+  if (Object.keys(portfolio).length === 0) return [];
+
+  // Aggregate all holdings into a single chart
+  const allSeries = Object.entries(portfolio).map(([ticker, pos]) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    if (!stock) return Array(numPoints).fill(0);
+    const change = STOCK_CHANGES[ticker]?.[period] || 0;
+    return generateChartPoints(pos.currentValue, change, numPoints);
+  });
+
+  // Sum all series point-by-point
+  const combined = Array(numPoints).fill(0);
+  allSeries.forEach(series => {
+    series.forEach((val, i) => { combined[i] += val; });
+  });
+  return combined;
+};
+
+// SVG chart component with hover tooltip
+const PortfolioChart = ({ points, color = '#00DC82', height = 180 }) => {
+  const [hoverIdx, setHoverIdx] = useState(null);
+  const svgRef = useRef(null);
+
+  if (!points || points.length < 2) return null;
+  const w = 600, h = height;
+  const pad = 4;
+  const minVal = Math.min(...points) * 0.995;
+  const maxVal = Math.max(...points) * 1.005;
+  const range = maxVal - minVal || 1;
+
+  const toX = (i) => pad + (i / (points.length - 1)) * (w - pad * 2);
+  const toY = (v) => h - pad - ((v - minVal) / range) * (h - pad * 2);
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p).toFixed(1)}`).join(' ');
+  const areaPath = linePath + ` L${toX(points.length - 1).toFixed(1)},${h} L${toX(0).toFixed(1)},${h} Z`;
+
+  const isPositive = points[points.length - 1] >= points[0];
+  const strokeColor = isPositive ? color : 'var(--red-primary)';
+
+  const handleMouseMove = useCallback((e) => {
+    if (!svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const idx = Math.round(x * (points.length - 1));
+    setHoverIdx(Math.max(0, Math.min(points.length - 1, idx)));
+  }, [points.length]);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!svgRef.current || !e.touches[0]) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const x = (e.touches[0].clientX - rect.left) / rect.width;
+    const idx = Math.round(x * (points.length - 1));
+    setHoverIdx(Math.max(0, Math.min(points.length - 1, idx)));
+  }, [points.length]);
+
+  const hoverPoint = hoverIdx !== null ? points[hoverIdx] : null;
+  const hoverChange = hoverIdx !== null ? ((points[hoverIdx] - points[0]) / points[0]) * 100 : null;
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Hover tooltip */}
+      {hoverIdx !== null && hoverPoint !== null && (
+        <div style={{
+          position: 'absolute', top: '-4px',
+          left: `${(hoverIdx / (points.length - 1)) * 100}%`,
+          transform: 'translateX(-50%)',
+          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+          borderRadius: '10px', padding: '6px 12px', zIndex: 10,
+          boxShadow: '0 4px 16px var(--card-hover-shadow)',
+          whiteSpace: 'nowrap', pointerEvents: 'none',
+        }}>
+          <span style={{ fontWeight: 700, fontSize: '14px', fontFamily: "'Space Grotesk', sans-serif" }}>
+            ${hoverPoint.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+          <span style={{
+            marginLeft: '8px', fontSize: '12px', fontWeight: 600,
+            color: hoverChange >= 0 ? 'var(--green-primary)' : 'var(--red-primary)',
+          }}>
+            {hoverChange >= 0 ? '+' : ''}{hoverChange.toFixed(2)}%
+          </span>
+        </div>
+      )}
+
+      <svg ref={svgRef} viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: '100%', cursor: 'crosshair' }} preserveAspectRatio="none"
+        onMouseMove={handleMouseMove} onMouseLeave={() => setHoverIdx(null)}
+        onTouchMove={handleTouchMove} onTouchEnd={() => setHoverIdx(null)}
+      >
+        {Array.from({ length: 4 }).map((_, i) => (
+          <line key={i} x1="0" y1={pad + (i + 1) * ((h - pad * 2) / 5)} x2={w} y2={pad + (i + 1) * ((h - pad * 2) / 5)} stroke="var(--border)" strokeWidth="0.5" />
+        ))}
+        <defs>
+          <linearGradient id="portfolioAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={strokeColor} stopOpacity="0.2" />
+            <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill="url(#portfolioAreaGrad)" />
+        <path d={linePath} fill="none" stroke={strokeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+        {/* Current end dot */}
+        {hoverIdx === null && (
+          <>
+            <circle cx={toX(points.length - 1)} cy={toY(points[points.length - 1])} r="4" fill={strokeColor} />
+            <circle cx={toX(points.length - 1)} cy={toY(points[points.length - 1])} r="8" fill={strokeColor} opacity="0.2" />
+          </>
+        )}
+
+        {/* Hover crosshair + dot */}
+        {hoverIdx !== null && (
+          <>
+            <line x1={toX(hoverIdx)} y1="0" x2={toX(hoverIdx)} y2={h} stroke="var(--text-muted)" strokeWidth="0.5" strokeDasharray="4,3" />
+            <circle cx={toX(hoverIdx)} cy={toY(points[hoverIdx])} r="5" fill={strokeColor} />
+            <circle cx={toX(hoverIdx)} cy={toY(points[hoverIdx])} r="10" fill={strokeColor} opacity="0.15" />
+          </>
+        )}
+      </svg>
+    </div>
+  );
+};
+
+// Mini sparkline for individual holdings
+const Sparkline = ({ ticker, period = 'month', width = 60, height = 24 }) => {
+  const stock = STOCKS.find(s => s.ticker === ticker);
+  if (!stock) return null;
+  const change = STOCK_CHANGES[ticker]?.[period] || 0;
+  const pts = generateChartPoints(stock.price, change, 20);
+  const minV = Math.min(...pts), maxV = Math.max(...pts), rng = maxV - minV || 1;
+  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${(i / 19 * width).toFixed(1)},${(height - ((p - minV) / rng) * height).toFixed(1)}`).join(' ');
+  const clr = change >= 0 ? 'var(--green-primary)' : 'var(--red-primary)';
+  return <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}><path d={path} fill="none" stroke={clr} strokeWidth="1.5" strokeLinecap="round" /></svg>;
+};
+
+// ==================== PORTFOLIO ====================
+const PortfolioScreen = ({ portfolio, cashBalance = 0, onSellShares, onCashOut, onBuyStock, onNavigate }) => {
+  const [timePeriod, setTimePeriod] = useState('1M');
+  const [chartMode, setChartMode] = useState('holdings'); // 'holdings' or 'winnings'
+  const [selectedPosition, setSelectedPosition] = useState(null); // ticker string
+  const [sellModal, setSellModal] = useState(null);
+  const [sellAmount, setSellAmount] = useState('');
+  const [cashOutModal, setCashOutModal] = useState(null);
+  const [cashOutAmount, setCashOutAmount] = useState('');
+  const [cashOutSuccess, setCashOutSuccess] = useState(null);
+  const [buyModal, setBuyModal] = useState(null);
+  const [buyAmount, setBuyAmount] = useState('');
+
+  const portfolioValue = Object.values(portfolio).reduce((sum, pos) => sum + pos.currentValue, 0);
+  const totalCost = Object.values(portfolio).reduce((sum, pos) => sum + pos.totalCost, 0);
+  const totalGain = portfolioValue - totalCost;
+  const totalGainPct = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
+
+  // Chart data based on mode
+  const periodKey = { '1D': 'day', '1W': 'week', '1M': 'month', '3M': 'quarter', 'ALL': 'quarter' }[timePeriod] || 'month';
+  const chartPoints = useMemo(() => {
+    if (chartMode === 'winnings') {
+      // Winnings chart: shows cumulative value won
+      const numPts = { '1D': 24, '1W': 7, '1M': 30, '3M': 90, 'ALL': 120 }[timePeriod] || 30;
+      if (totalCost <= 0) return [];
+      return generateChartPoints(totalCost, 0, numPts); // flat line for cost basis
+    }
+    return generatePortfolioChart(portfolio, timePeriod);
+  }, [portfolio, timePeriod, chartMode, totalCost]);
+
+  const chartChange = useMemo(() => {
+    if (chartPoints.length < 2) return { value: 0, pct: 0 };
+    const start = chartPoints[0], end = chartPoints[chartPoints.length - 1];
+    return { value: end - start, pct: start > 0 ? ((end - start) / start) * 100 : 0 };
+  }, [chartPoints]);
+
+  // Position detail chart
+  const positionChartPoints = useMemo(() => {
+    if (!selectedPosition) return [];
+    const stock = STOCKS.find(s => s.ticker === selectedPosition);
+    if (!stock) return [];
+    const change = STOCK_CHANGES[selectedPosition]?.[periodKey] || 0;
+    const numPts = { '1D': 24, '1W': 7, '1M': 30, '3M': 90, 'ALL': 120 }[timePeriod] || 30;
+    return generateChartPoints(stock.price, change, numPts);
+  }, [selectedPosition, timePeriod, periodKey]);
+
+  const openSellModal = (ticker) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    const holding = portfolio[ticker];
+    if (!stock || !holding) return;
+    setSellModal({ ticker, maxShares: holding.shares, price: stock.price, name: stock.name, logoType: stock.logoType, color: stock.color });
+    setSellAmount('');
+  };
+
+  const handleConfirmSell = () => {
+    const amount = parseFloat(sellAmount);
+    if (!amount || amount <= 0 || amount > sellModal.maxShares) return;
+    onSellShares(sellModal.ticker, amount);
+    setSellModal(null);
+    setSellAmount('');
+    // If we sold everything, close position detail
+    const remaining = sellModal.maxShares - amount;
+    if (remaining <= 0.0001) setSelectedPosition(null);
+  };
+
+  const sellValue = parseFloat(sellAmount) > 0 && sellModal ? parseFloat(sellAmount) * sellModal.price : 0;
+  const spinsEarned = Math.floor(sellValue);
+
+  const openCashOutModal = (ticker) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    const holding = portfolio[ticker];
+    if (!stock || !holding) return;
+    setCashOutModal({ ticker, maxShares: holding.shares, price: stock.price, name: stock.name, logoType: stock.logoType, color: stock.color });
+    setCashOutAmount('');
+  };
+
+  const handleConfirmCashOut = () => {
+    const amount = parseFloat(cashOutAmount);
+    if (!amount || amount <= 0 || amount > cashOutModal.maxShares) return;
+    const cashValue = amount * cashOutModal.price;
+    // Cash out shares → adds dollar value to portfolio cash balance
+    onCashOut(cashOutModal.ticker, amount);
+    setCashOutModal(null);
+    setCashOutAmount('');
+    setCashOutSuccess(cashValue);
+    setTimeout(() => setCashOutSuccess(null), 4000);
+    // If we cashed out everything, close position detail
+    const remaining = cashOutModal.maxShares - amount;
+    if (remaining <= 0.0001) setSelectedPosition(null);
+  };
+
+  const handleConfirmBuy = () => {
+    const amount = parseFloat(buyAmount);
+    if (!amount || amount <= 0 || amount > cashBalance) return;
+    const spinsEarned = Math.floor((amount * STOCK_BUY_SPIN_RATE) / 1000);
+    onBuyStock(buyModal.ticker, amount);
+    setBuySuccess({ ticker: buyModal.ticker, amount, spins: spinsEarned });
+    setTimeout(() => setBuySuccess(null), 5000);
+    setBuyModal(null);
+    setBuyAmount('');
+  };
+
+  const openBuyModal = (ticker) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    if (!stock) return;
+    setBuyModal({ ticker, price: stock.price, name: stock.name, logoType: stock.logoType, color: stock.color });
+    setBuyAmount('');
+  };
+
+  const buyShares = parseFloat(buyAmount) > 0 && buyModal ? parseFloat(buyAmount) / buyModal.price : 0;
+  const buyBonusSpins = buyShares > 0 && buyAmount ? Math.floor((parseFloat(buyAmount) * STOCK_BUY_SPIN_RATE) / 1000) : 0;
+
+  const [buySuccess, setBuySuccess] = useState(null);
+
+  const cashOutValue = parseFloat(cashOutAmount) > 0 && cashOutModal ? parseFloat(cashOutAmount) * cashOutModal.price : 0;
+
+  // ==================== POSITION DETAIL VIEW ====================
+  if (selectedPosition) {
+    const stock = STOCKS.find(s => s.ticker === selectedPosition);
+    const pos = portfolio[selectedPosition];
+    if (!stock || !pos) { setSelectedPosition(null); return null; }
+    const change = STOCK_CHANGES[selectedPosition] || {};
+    const dayChange = change[periodKey] || 0;
+    const posGain = pos.currentValue - pos.totalCost;
+    const posGainPct = pos.totalCost > 0 ? (posGain / pos.totalCost) * 100 : 0;
+
+    return (
+      <div className="page-content">
+        {/* Back button */}
+        <button onClick={() => setSelectedPosition(null)} className="btn btn-ghost" style={{ marginBottom: '16px', padding: '8px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+          ← Back to Portfolio
+        </button>
+
+        {/* Stock header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: '16px',
+            background: `linear-gradient(135deg, ${stock.color}22, ${stock.color}11)`,
+            border: `1px solid ${stock.color}33`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <StockLogo type={stock.logoType} size={32} />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: 700 }}>${stock.ticker}</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{stock.name}</p>
+          </div>
+        </div>
+
+        {/* Current price */}
+        <div style={{ marginBottom: '8px' }}>
+          <span style={{ fontSize: '40px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif" }}>
+            ${stock.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </span>
+        </div>
+        <div style={{ marginBottom: '24px' }}>
+          <span style={{ color: dayChange >= 0 ? 'var(--green-primary)' : 'var(--red-primary)', fontWeight: 600, fontSize: '15px' }}>
+            {dayChange >= 0 ? '+' : ''}{dayChange.toFixed(2)}% {timePeriod}
+          </span>
+        </div>
+
+        {/* Chart */}
+        <div className="card" style={{ marginBottom: '16px', padding: '20px', height: '220px' }}>
+          <PortfolioChart points={positionChartPoints} color={stock.color} height={180} />
+        </div>
+
+        {/* Time period buttons */}
+        <div style={{ marginBottom: '32px', display: 'flex', gap: '6px' }}>
+          {['1D', '1W', '1M', '3M', 'ALL'].map((p) => (
+            <button key={p} onClick={() => setTimePeriod(p)} className={p === timePeriod ? 'btn btn-primary' : 'btn btn-secondary'} style={{ flex: 1, padding: '8px', fontSize: '13px' }}>
+              {p}
+            </button>
+          ))}
+        </div>
+
+        {/* Your Position */}
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.5px', marginBottom: '16px' }}>YOUR POSITION</h3>
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px', marginBottom: '4px' }}>SHARES</p>
+              <p style={{ fontSize: '20px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>{pos.shares.toFixed(4)}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px', marginBottom: '4px' }}>MARKET VALUE</p>
+              <p style={{ fontSize: '20px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>${pos.currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px', marginBottom: '4px' }}>AVG COST</p>
+              <p style={{ fontSize: '20px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" }}>${(pos.totalCost / pos.shares).toFixed(2)}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px', marginBottom: '4px' }}>TOTAL RETURN</p>
+              <p style={{ fontSize: '20px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif", color: posGain >= 0 ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+                {posGain >= 0 ? '+' : ''}{posGainPct.toFixed(2)}%
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: 'grid', gap: '10px', marginBottom: '32px' }}>
+          {cashBalance > 0 && (
+            <button onClick={() => openBuyModal(selectedPosition)} className="btn btn-primary" style={{ width: '100%', fontSize: '15px', padding: '14px' }}>
+              Buy More (${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} available)
+            </button>
+          )}
+          <button onClick={() => openCashOutModal(selectedPosition)} className="btn btn-secondary" style={{ width: '100%', fontSize: '15px', padding: '14px', borderColor: 'var(--green-primary)', color: 'var(--green-primary)' }}>
+            Cash Out to Balance
+          </button>
+          <button onClick={() => openSellModal(selectedPosition)} className="btn btn-secondary" style={{ width: '100%', fontSize: '14px', padding: '12px' }}>
+            Sell for Spins
+          </button>
+          <button onClick={() => onNavigate('game')} className="btn btn-ghost" style={{ width: '100%', fontSize: '14px', padding: '12px' }}>
+            Spin to Win More {stock.ticker}
+          </button>
+        </div>
+
+        {/* Stock Info */}
+        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.5px', marginBottom: '16px' }}>PERFORMANCE</h3>
+        <div className="card">
+          {[
+            { label: 'Today', value: change.day },
+            { label: 'This Week', value: change.week },
+            { label: 'This Month', value: change.month },
+            { label: 'This Quarter', value: change.quarter },
+          ].map((row, i) => (
+            <div key={i} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '12px 0',
+              borderBottom: i < 3 ? '1px solid var(--border)' : 'none',
+            }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{row.label}</span>
+              <span style={{ fontWeight: 600, fontSize: '14px', color: (row.value || 0) >= 0 ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+                {(row.value || 0) >= 0 ? '+' : ''}{(row.value || 0).toFixed(2)}%
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Sell Shares Modal (reused) */}
+        {sellModal && (
+          <div className="modal-overlay" onClick={() => setSellModal(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: '12px',
+                  background: `linear-gradient(135deg, ${sellModal.color}22, ${sellModal.color}11)`,
+                  border: `1px solid ${sellModal.color}33`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <StockLogo type={sellModal.logoType} size={24} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Sell ${sellModal.ticker}</h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>$1 = 1 spin</p>
+                </div>
+              </div>
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>Shares to Sell</label>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Available: {sellModal.maxShares.toFixed(4)}</span>
+                </div>
+                <input type="number" className="form-input" style={{ width: '100%', fontSize: '18px', fontWeight: 600, padding: '14px 16px' }}
+                  placeholder="0.00" step="0.01" min="0.01" max={sellModal.maxShares} value={sellAmount}
+                  onChange={(e) => { const val = parseFloat(e.target.value); if (e.target.value === '' || (val >= 0 && val <= sellModal.maxShares)) setSellAmount(e.target.value); }}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '12px' }}>
+                  {[{ label: '25%', m: 0.25 }, { label: '50%', m: 0.5 }, { label: '75%', m: 0.75 }, { label: 'All', m: 1 }].map((o) => (
+                    <button key={o.label} className="btn btn-ghost" style={{ padding: '8px', fontSize: '12px', fontWeight: 600, border: '1px solid var(--border)', borderRadius: '8px' }}
+                      onClick={() => setSellAmount((sellModal.maxShares * o.m).toFixed(4))}>{o.label}</button>
+                  ))}
+                </div>
+              </div>
+              {sellValue > 0 && (
+                <div style={{ background: 'rgba(0, 220, 130, 0.08)', border: '1px solid rgba(0, 220, 130, 0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Sale Value</span>
+                    <span style={{ fontWeight: 600 }}>${sellValue.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Price per Share</span>
+                    <span style={{ fontWeight: 600 }}>${sellModal.price.toFixed(2)}</span>
+                  </div>
+                  <div style={{ borderTop: '1px solid rgba(0, 220, 130, 0.2)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>You'll Receive</span>
+                    <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--green-primary)' }}>{spinsEarned.toLocaleString()} Spins</span>
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'grid', gap: '12px' }}>
+                <button onClick={handleConfirmSell} className="btn btn-primary" disabled={!sellAmount || parseFloat(sellAmount) <= 0 || parseFloat(sellAmount) > sellModal.maxShares}
+                  style={{ width: '100%', fontSize: '16px', padding: '14px' }}>
+                  Sell {sellAmount ? parseFloat(sellAmount).toFixed(4) : '0'} Shares → {spinsEarned.toLocaleString()} Spins
+                </button>
+                <button onClick={() => setSellModal(null)} className="btn btn-secondary" style={{ width: '100%' }}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cash Out Modal */}
+        {cashOutModal && (
+          <div className="modal-overlay" onClick={() => setCashOutModal(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: '12px',
+                  background: `linear-gradient(135deg, ${cashOutModal.color}22, ${cashOutModal.color}11)`,
+                  border: `1px solid ${cashOutModal.color}33`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <StockLogo type={cashOutModal.logoType} size={24} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Cash Out ${cashOutModal.ticker}</h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Convert shares to cash balance</p>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>Shares to Cash Out</label>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Available: {cashOutModal.maxShares.toFixed(4)}</span>
+                </div>
+                <input type="number" className="form-input" style={{ width: '100%', fontSize: '18px', fontWeight: 600, padding: '14px 16px' }}
+                  placeholder="0.00" step="0.01" min="0.01" max={cashOutModal.maxShares} value={cashOutAmount}
+                  onChange={(e) => { const val = parseFloat(e.target.value); if (e.target.value === '' || (val >= 0 && val <= cashOutModal.maxShares)) setCashOutAmount(e.target.value); }}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '12px' }}>
+                  {[{ label: '25%', m: 0.25 }, { label: '50%', m: 0.5 }, { label: '75%', m: 0.75 }, { label: 'All', m: 1 }].map((o) => (
+                    <button key={o.label} className="btn btn-ghost" style={{ padding: '8px', fontSize: '12px', fontWeight: 600, border: '1px solid var(--border)', borderRadius: '8px' }}
+                      onClick={() => setCashOutAmount((cashOutModal.maxShares * o.m).toFixed(4))}>{o.label}</button>
+                  ))}
+                </div>
+              </div>
+
+              {cashOutValue > 0 && (
+                <div style={{ background: 'rgba(0, 220, 130, 0.08)', border: '1px solid rgba(0, 220, 130, 0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Gross Value</span>
+                    <span style={{ fontWeight: 600 }}>${cashOutValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Placement Fee (3%)</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>-${(cashOutValue * PLACEMENT_FEE).toFixed(2)}</span>
+                  </div>
+                  <div style={{ borderTop: '1px solid rgba(0, 220, 130, 0.2)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>You'll Receive</span>
+                    <span style={{ fontSize: '28px', fontWeight: 800, color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                      ${(cashOutValue * (1 - PLACEMENT_FEE)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>Added to your portfolio cash balance instantly</p>
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gap: '12px' }}>
+                <button onClick={handleConfirmCashOut} className="btn btn-primary"
+                  disabled={!cashOutAmount || parseFloat(cashOutAmount) <= 0 || parseFloat(cashOutAmount) > cashOutModal.maxShares}
+                  style={{ width: '100%', fontSize: '16px', padding: '14px' }}>
+                  Cash Out ${cashOutValue > 0 ? (cashOutValue * (1 - PLACEMENT_FEE)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+                </button>
+                <button onClick={() => setCashOutModal(null)} className="btn btn-secondary" style={{ width: '100%' }}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Buy Stock Modal */}
+        {buyModal && (
+          <div className="modal-overlay" onClick={() => setBuyModal(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: '12px',
+                  background: `linear-gradient(135deg, ${buyModal.color}22, ${buyModal.color}11)`,
+                  border: `1px solid ${buyModal.color}33`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <StockLogo type={buyModal.logoType} size={24} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Buy {buyModal.ticker}</h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Cash balance: ${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <label className="form-label" style={{ marginBottom: 0 }}>Amount ($)</label>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>@ ${buyModal.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/share</span>
+                </div>
+                <input type="number" className="form-input" style={{ width: '100%', fontSize: '18px', fontWeight: 600, padding: '14px 16px' }}
+                  placeholder="0.00" step="0.01" min="0.01" max={cashBalance} value={buyAmount}
+                  onChange={(e) => { const val = parseFloat(e.target.value); if (e.target.value === '' || (val >= 0 && val <= cashBalance)) setBuyAmount(e.target.value); }}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '12px' }}>
+                  {[{ label: '25%', m: 0.25 }, { label: '50%', m: 0.5 }, { label: '75%', m: 0.75 }, { label: 'All', m: 1 }].map((o) => (
+                    <button key={o.label} className="btn btn-ghost" style={{ padding: '8px', fontSize: '12px', fontWeight: 600, border: '1px solid var(--border)', borderRadius: '8px' }}
+                      onClick={() => setBuyAmount((cashBalance * o.m).toFixed(2))}>{o.label}</button>
+                  ))}
+                </div>
+              </div>
+
+              {buyShares > 0 && (
+                <div style={{ background: 'rgba(0, 220, 130, 0.08)', border: '1px solid rgba(0, 220, 130, 0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Shares</span>
+                    <span style={{ fontWeight: 600 }}>{buyShares.toFixed(4)} shares</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Price per Share</span>
+                    <span style={{ fontWeight: 600 }}>${buyModal.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <div style={{ borderTop: '1px solid rgba(0, 220, 130, 0.2)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Total Cost</span>
+                    <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                      ${parseFloat(buyAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  {buyBonusSpins > 0 && (
+                    <div style={{ borderTop: '1px solid rgba(255,153,0,0.2)', paddingTop: '8px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#FF9900', fontSize: '13px', fontWeight: 600 }}>🎰 Bonus Spins (5× value)</span>
+                      <span style={{ fontSize: '18px', fontWeight: 700, color: '#FF9900', fontFamily: "'Space Grotesk', sans-serif" }}>
+                        +{buyBonusSpins} spins
+                      </span>
+                    </div>
+                  )}
+                  {parseFloat(buyAmount) > 0 && buyBonusSpins === 0 && (
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', borderTop: '1px solid rgba(255,153,0,0.1)', paddingTop: '8px' }}>
+                      🎰 Spend $1,000+ to earn bonus spins (5 per $1K)
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gap: '12px' }}>
+                <button onClick={handleConfirmBuy} className="btn btn-primary"
+                  disabled={!buyAmount || parseFloat(buyAmount) <= 0 || parseFloat(buyAmount) > cashBalance}
+                  style={{ width: '100%', fontSize: '16px', padding: '14px' }}>
+                  Buy {buyShares > 0 ? buyShares.toFixed(4) : '0'} Shares of {buyModal.ticker}
+                </button>
+                <button onClick={() => setBuyModal(null)} className="btn btn-secondary" style={{ width: '100%' }}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cash out success toast */}
+        {cashOutSuccess && (
+          <div style={{
+            position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 1100, animation: 'fadeInUp 0.4s ease',
+          }}>
+            <div style={{
+              background: 'var(--green-primary)', color: '#000', padding: '14px 28px',
+              borderRadius: '100px', fontWeight: 700, fontSize: '15px',
+              boxShadow: '0 8px 32px rgba(0, 220, 130, 0.4)',
+            }}>
+              +${cashOutSuccess.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} added to cash balance
+            </div>
+          </div>
+        )}
+
+        {/* Buy success toast with bonus spins */}
+        {buySuccess && (
+          <div style={{
+            position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 1100, animation: 'fadeInUp 0.4s ease',
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #00DC82, #00B368)', color: '#000', padding: '14px 24px',
+              borderRadius: '16px', fontWeight: 600, fontSize: '14px',
+              boxShadow: '0 8px 32px rgba(0, 220, 130, 0.4)', textAlign: 'center',
+              minWidth: '240px',
+            }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: '15px' }}>
+                ✅ Bought ${buySuccess.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of {buySuccess.ticker}
+              </p>
+              {buySuccess.spins > 0 && (
+                <p style={{ margin: '6px 0 0', fontSize: '14px', fontWeight: 700, color: '#1a1a1a' }}>
+                  🎰 +{buySuccess.spins} bonus spins earned!
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ==================== MAIN PORTFOLIO LIST VIEW ====================
+  return (
+    <div className="page-content">
+      {/* Portfolio value header */}
+      <div style={{ marginBottom: '8px' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 500, letterSpacing: '0.5px', marginBottom: '6px' }}>
+          {chartMode === 'holdings' ? 'TOTAL PORTFOLIO' : 'TOTAL WINNINGS'}
+        </p>
+        <div style={{ fontSize: '42px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif" }}>
+          ${chartMode === 'holdings' ? (portfolioValue + cashBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : totalCost.toFixed(2)}
+        </div>
+      </div>
+
+      {/* Cash balance + stock value breakdown */}
+      {chartMode === 'holdings' && (portfolioValue > 0 || cashBalance > 0) && (
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '12px', fontSize: '13px' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>Stocks: <strong style={{ color: 'var(--text-primary)' }}>${portfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+          <span style={{ color: 'var(--text-secondary)' }}>Cash: <strong style={{ color: 'var(--green-primary)' }}>${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
+        </div>
+      )}
+      {portfolioValue > 0 && (
+        <div style={{ marginBottom: '24px' }}>
+          <span style={{
+            color: chartChange.value >= 0 ? 'var(--green-primary)' : 'var(--red-primary)',
+            fontWeight: 600, fontSize: '15px',
+          }}>
+            {chartChange.value >= 0 ? '+' : ''}${Math.abs(chartChange.value).toFixed(2)} ({chartChange.pct >= 0 ? '+' : ''}{chartChange.pct.toFixed(2)}%) {timePeriod}
+          </span>
+        </div>
+      )}
+
+      {/* Chart toggle: Holdings vs Winnings */}
+      <div style={{ display: 'flex', marginBottom: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)', padding: '4px' }}>
+        {[{ key: 'holdings', label: 'Stock Holdings' }, { key: 'winnings', label: 'Winnings' }].map((tab) => (
+          <button key={tab.key} onClick={() => setChartMode(tab.key)} style={{
+            flex: 1, padding: '10px', fontSize: '13px', fontWeight: 600, borderRadius: '10px', border: 'none', cursor: 'pointer',
+            background: chartMode === tab.key ? 'var(--green-primary)' : 'transparent',
+            color: chartMode === tab.key ? '#000' : 'var(--text-secondary)',
+            transition: 'all 0.25s ease',
+          }}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Chart */}
+      {chartPoints.length > 1 ? (
+        <div className="card" style={{ marginBottom: '16px', padding: '20px', height: '220px' }}>
+          <PortfolioChart points={chartPoints} />
+        </div>
+      ) : (
+        <div className="card" style={{ marginBottom: '16px', padding: '40px', textAlign: 'center', height: '220px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>Win some stocks to see your chart</p>
+        </div>
+      )}
+
+      {/* Time period buttons */}
+      <div style={{ marginBottom: '32px', display: 'flex', gap: '6px' }}>
+        {['1D', '1W', '1M', '3M', 'ALL'].map((p) => (
+          <button key={p} onClick={() => setTimePeriod(p)} className={p === timePeriod ? 'btn btn-primary' : 'btn btn-secondary'} style={{ flex: 1, padding: '8px', fontSize: '13px' }}>
+            {p}
+          </button>
+        ))}
+      </div>
+
+      {/* Buy stocks with cash balance */}
+      {cashBalance > 0 && (
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.3px', marginBottom: '12px' }}>Buy Stocks</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px' }}>
+            {STOCKS.slice(0, 8).map((stock) => (
+              <button key={stock.ticker} onClick={() => openBuyModal(stock.ticker)} className="card" style={{
+                cursor: 'pointer', padding: '12px 8px', textAlign: 'center', border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+              }}>
+                <div style={{ width: 32, height: 32, margin: '0 auto 6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <StockLogo type={stock.logoType} size={24} />
+                </div>
+                <p style={{ fontSize: '12px', fontWeight: 700 }}>{stock.ticker}</p>
+                <p style={{ fontSize: '10px', color: 'var(--text-muted)' }}>${stock.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Holdings list */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h2 style={{ fontSize: '18px', fontWeight: 600 }}>Holdings</h2>
+        {Object.keys(portfolio).length > 0 && (
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{Object.keys(portfolio).length} stock{Object.keys(portfolio).length > 1 ? 's' : ''}</span>
+        )}
+      </div>
+
+      {Object.entries(portfolio).length > 0 ? (
+        <div style={{ display: 'grid', gap: '10px' }}>
+          {Object.entries(portfolio).map(([ticker, pos]) => {
+            const stock = STOCKS.find(s => s.ticker === ticker);
+            if (!stock) return null;
+            const change = STOCK_CHANGES[ticker]?.[periodKey] || 0;
+            const posGain = pos.currentValue - pos.totalCost;
+
+            return (
+              <div key={ticker} className="card" onClick={() => setSelectedPosition(ticker)}
+                style={{ cursor: 'pointer', padding: '16px', transition: 'all 0.2s' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    <StockBadge ticker={ticker} name={stock.name} logoType={stock.logoType} color={stock.color} size="small" />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontWeight: 700, fontSize: '15px' }}>${ticker}</p>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{pos.shares.toFixed(2)} shares</span>
+                      </div>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{stock.name}</p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Sparkline ticker={ticker} period={periodKey} />
+                    <div style={{ textAlign: 'right', minWidth: '80px' }}>
+                      <p style={{ fontWeight: 700, fontSize: '15px', fontFamily: "'Space Grotesk', sans-serif" }}>
+                        ${pos.currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p style={{ fontSize: '12px', fontWeight: 600, color: change >= 0 ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+                        {change >= 0 ? '+' : ''}{change.toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-secondary)' }}>
+          <div style={{ fontSize: '40px', marginBottom: '12px' }}>📈</div>
+          <p style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-primary)' }}>No holdings yet</p>
+          <p style={{ fontSize: '14px' }}>Win shares by playing the slot machine!</p>
+          <button onClick={() => onNavigate('game')} className="btn btn-primary" style={{ marginTop: '20px' }}>Start Spinning</button>
+        </div>
+      )}
+
+      {/* Buy Modal (from main list) */}
+      {buyModal && !selectedPosition && (
+        <div className="modal-overlay" onClick={() => setBuyModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: '12px',
+                background: `linear-gradient(135deg, ${buyModal.color}22, ${buyModal.color}11)`,
+                border: `1px solid ${buyModal.color}33`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <StockLogo type={buyModal.logoType} size={24} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '20px', fontWeight: 700 }}>Buy {buyModal.ticker}</h2>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Cash: ${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              </div>
+            </div>
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <label className="form-label" style={{ marginBottom: 0 }}>Amount ($)</label>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>@ ${buyModal.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/share</span>
+              </div>
+              <input type="number" className="form-input" style={{ width: '100%', fontSize: '18px', fontWeight: 600, padding: '14px 16px' }}
+                placeholder="0.00" step="0.01" min="0.01" max={cashBalance} value={buyAmount}
+                onChange={(e) => { const val = parseFloat(e.target.value); if (e.target.value === '' || (val >= 0 && val <= cashBalance)) setBuyAmount(e.target.value); }}
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '12px' }}>
+                {[{ label: '25%', m: 0.25 }, { label: '50%', m: 0.5 }, { label: '75%', m: 0.75 }, { label: 'All', m: 1 }].map((o) => (
+                  <button key={o.label} className="btn btn-ghost" style={{ padding: '8px', fontSize: '12px', fontWeight: 600, border: '1px solid var(--border)', borderRadius: '8px' }}
+                    onClick={() => setBuyAmount((cashBalance * o.m).toFixed(2))}>{o.label}</button>
+                ))}
+              </div>
+            </div>
+            {buyShares > 0 && (
+              <div style={{ background: 'rgba(0, 220, 130, 0.08)', border: '1px solid rgba(0, 220, 130, 0.2)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>You'll get</span>
+                  <span style={{ fontWeight: 600 }}>{buyShares.toFixed(4)} shares of {buyModal.ticker}</span>
+                </div>
+                <div style={{ borderTop: '1px solid rgba(0, 220, 130, 0.2)', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Cost</span>
+                  <span style={{ fontSize: '24px', fontWeight: 700, color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>
+                    ${parseFloat(buyAmount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                {buyBonusSpins > 0 && (
+                  <div style={{ borderTop: '1px solid rgba(255,153,0,0.2)', paddingTop: '8px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: '#FF9900', fontSize: '13px', fontWeight: 600 }}>🎰 Bonus Spins (5× value)</span>
+                    <span style={{ fontSize: '18px', fontWeight: 700, color: '#FF9900', fontFamily: "'Space Grotesk', sans-serif" }}>
+                      +{buyBonusSpins} spins
+                    </span>
+                  </div>
+                )}
+                {parseFloat(buyAmount) > 0 && buyBonusSpins === 0 && (
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', borderTop: '1px solid rgba(255,153,0,0.1)', paddingTop: '8px' }}>
+                    🎰 Spend $1,000+ to earn bonus spins (5 per $1K)
+                  </p>
+                )}
+              </div>
+            )}
+            <div style={{ display: 'grid', gap: '12px' }}>
+              <button onClick={handleConfirmBuy} className="btn btn-primary"
+                disabled={!buyAmount || parseFloat(buyAmount) <= 0 || parseFloat(buyAmount) > cashBalance}
+                style={{ width: '100%', fontSize: '16px', padding: '14px' }}>
+                Buy {buyShares > 0 ? buyShares.toFixed(4) : '0'} Shares
+              </button>
+              <button onClick={() => setBuyModal(null)} className="btn btn-secondary" style={{ width: '100%' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Buy success toast with bonus spins (main list view) */}
+      {buySuccess && !selectedPosition && (
+        <div style={{
+          position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 1100, animation: 'fadeInUp 0.4s ease',
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #00DC82, #00B368)', color: '#000', padding: '14px 24px',
+            borderRadius: '16px', fontWeight: 600, fontSize: '14px',
+            boxShadow: '0 8px 32px rgba(0, 220, 130, 0.4)', textAlign: 'center',
+            minWidth: '240px',
+          }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: '15px' }}>
+              ✅ Bought ${buySuccess.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} of {buySuccess.ticker}
+            </p>
+            {buySuccess.spins > 0 && (
+              <p style={{ margin: '6px 0 0', fontSize: '14px', fontWeight: 700, color: '#1a1a1a' }}>
+                🎰 +{buySuccess.spins} bonus spins earned!
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==================== ACCOUNT ====================
+// ==================== AUDIT DASHBOARD ====================
+const AuditDashboard = () => {
+  const [expanded, setExpanded] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [stats, setStats] = useState(AuditLog.getStats());
+
+  // Refresh stats when expanded
+  useEffect(() => {
+    if (expanded) setStats(AuditLog.getStats());
+  }, [expanded]);
+
+  const handleExport = () => {
+    const json = AuditLog.export();
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `borda-audit-log-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const StatBox = ({ label, value, sub, color }) => (
+    <div style={{ textAlign: 'center', padding: '12px 8px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+      <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</p>
+      <p style={{ fontSize: '22px', fontWeight: 700, color: color || 'var(--text-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>{value}</p>
+      {sub && <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{sub}</p>}
+    </div>
+  );
+
+  const RateRow = ({ label, actual, expected }) => {
+    const diff = actual - expected;
+    const diffColor = Math.abs(diff) < 5 ? 'var(--green-primary)' : 'var(--red-primary)';
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, padding: '10px 0', borderBottom: '1px solid var(--border)', fontSize: '12px' }}>
+        <span style={{ fontWeight: 600 }}>{label}</span>
+        <span style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>{expected.toFixed(2)}%</span>
+        <span style={{ textAlign: 'center', fontWeight: 600 }}>{actual.toFixed(2)}%</span>
+        <span style={{ textAlign: 'right', fontWeight: 600, color: stats.totalSpins >= 10 ? diffColor : 'var(--text-muted)' }}>{diff >= 0 ? '+' : ''}{diff.toFixed(2)}%</span>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      <button onClick={() => setExpanded(!expanded)} className="card" style={{
+        width: '100%', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '16px 20px', border: '1px solid var(--border)', textAlign: 'left',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '18px' }}>📊</span>
+          <div>
+            <p style={{ fontWeight: 600, fontSize: '15px' }}>Audit Log</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Win rates, payouts, and event history</p>
+          </div>
+        </div>
+        <span style={{ color: 'var(--text-muted)', fontSize: '18px', transform: expanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▼</span>
+      </button>
+
+      {expanded && (
+        <div style={{ marginTop: '12px', animation: 'fadeInUp 0.3s ease' }}>
+          {/* Summary stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+            <StatBox label="TOTAL SPINS" value={stats.totalSpins} />
+            <StatBox label="WINS" value={stats.totalWins} color="var(--green-primary)" />
+            <StatBox label="LOSSES" value={stats.totalLosses} color="var(--red-primary)" />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
+            <StatBox label="JACKPOTS" value={stats.totalJackpots} sub="3-of-a-kind" color="#FFD700" />
+            <StatBox label="SHARES WON" value={stats.totalSharesWon} />
+            <StatBox label="VALUE WON" value={`$${stats.totalValueWon.toFixed(0)}`} color="var(--green-primary)" />
+          </div>
+
+          {/* Probability audit */}
+          <div className="card" style={{ marginBottom: '16px', padding: '16px' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>PROBABILITY AUDIT</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.3px' }}>
+              <span>TYPE</span><span style={{ textAlign: 'center' }}>EXPECTED</span><span style={{ textAlign: 'center' }}>ACTUAL</span><span style={{ textAlign: 'right' }}>DIFF</span>
+            </div>
+            <RateRow label="Win (3-of-a-kind)" actual={stats.winRate} expected={stats.expectedWinRate} />
+            <RateRow label="Loss" actual={stats.lossRate} expected={stats.expectedLossRate} />
+            {stats.totalSpins < 30 && (
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px', fontStyle: 'italic' }}>
+                Note: Small sample size ({stats.totalSpins} spins). Rates converge with more spins.
+              </p>
+            )}
+          </div>
+
+          {/* Payouts & actions */}
+          <div className="card" style={{ marginBottom: '16px', padding: '16px' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-secondary)', letterSpacing: '0.5px' }}>PAYOUT ACTIONS</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+              <StatBox label="KEPT AS SHARES" value={stats.totalKept} />
+              <StatBox label="CONVERTED TO SPINS" value={stats.totalConverted} />
+              <StatBox label="SOLD FOR SPINS" value={stats.totalSellEvents} sub={stats.totalSold > 0 ? `$${stats.totalSold.toFixed(0)} value` : ''} />
+              <StatBox label="CASHED OUT" value={stats.totalCashOutEvents} sub={stats.totalCashedOut > 0 ? `$${stats.totalCashedOut.toFixed(0)} withdrawn` : ''} color="var(--green-primary)" />
+            </div>
+          </div>
+
+          {/* Event history toggle */}
+          <button onClick={() => setShowHistory(!showHistory)} className="btn btn-secondary" style={{ width: '100%', marginBottom: '12px', fontSize: '13px' }}>
+            {showHistory ? 'Hide' : 'Show'} Event History ({AuditLog.getEvents().length} events)
+          </button>
+
+          {showHistory && (
+            <div className="card" style={{ padding: '12px', maxHeight: '300px', overflowY: 'auto', marginBottom: '12px' }}>
+              {AuditLog.getEvents().length === 0 ? (
+                <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px', padding: '16px' }}>No events yet. Start spinning!</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {[...AuditLog.getEvents()].reverse().map((event, idx) => {
+                    const typeColors = {
+                      spin: event.matchType === 'loss' ? 'var(--red-primary)' : 'var(--green-primary)',
+                      win_kept: '#4285F4',
+                      win_converted: '#FF9900',
+                      sell: '#E50914',
+                      cash_out: 'var(--green-primary)',
+                      purchase: '#7FBA00',
+                    };
+                    const typeLabels = {
+                      spin: event.matchType === 'jackpot' ? 'WIN' : 'LOSS',
+                      win_kept: 'KEPT',
+                      win_converted: 'CONVERTED',
+                      sell: 'SOLD',
+                      cash_out: 'CASH OUT',
+                      purchase: 'PURCHASE',
+                    };
+                    return (
+                      <div key={event.id || idx} style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '8px 10px', borderRadius: '8px', fontSize: '11px',
+                        background: idx % 2 === 0 ? 'var(--bg-primary)' : 'transparent',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{
+                            fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px',
+                            background: `${typeColors[event.type]}22`, color: typeColors[event.type],
+                          }}>{typeLabels[event.type]}</span>
+                          <span style={{ fontWeight: 600 }}>{event.ticker ? `$${event.ticker}` : ''}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {event.shares > 0 && <span style={{ color: 'var(--text-secondary)' }}>{event.shares} shares</span>}
+                          {event.value > 0 && <span style={{ fontWeight: 600, color: 'var(--green-primary)' }}>${event.value.toFixed(2)}</span>}
+                          <span style={{ color: 'var(--text-muted)', fontSize: '10px' }}>{new Date(event.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Export & clear */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <button onClick={handleExport} className="btn btn-primary" style={{ fontSize: '13px', padding: '10px' }}>
+              Export JSON
+            </button>
+            <button onClick={() => { AuditLog.clear(); setStats(AuditLog.getStats()); }} className="btn btn-secondary" style={{ fontSize: '13px', padding: '10px', color: 'var(--red-primary)', borderColor: 'var(--red-primary)' }}>
+              Clear Log
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AccountScreen = ({ onNavigate, onUpdateSpins, onShowRules }) => {
+  const [notifications, setNotifications] = useState(true);
+  const [soundEffects, setSoundEffects] = useState(() => SoundEngine.enabled);
+  const [emailUpdates, setEmailUpdates] = useState(false);
+
+  const depositBonusTiers = [
+    { deposit: 500, spins: 1, label: '$500' },
+    { deposit: 1000, spins: 2, label: '$1K' },
+    { deposit: 2500, spins: 5, label: '$2.5K' },
+    { deposit: 5000, spins: 10, label: '$5K' },
+  ];
+
+  const CustomToggle = ({ value, onChange }) => (
+    <button onClick={() => onChange(!value)} style={{
+      width: '48px', height: '28px', borderRadius: '14px', border: 'none',
+      background: value ? 'var(--green-primary)' : 'var(--border)', cursor: 'pointer',
+      display: 'flex', alignItems: 'center', padding: '2px', transition: 'all 0.3s',
+    }}>
+      <div style={{
+        width: '24px', height: '24px', borderRadius: '50%', background: '#fff',
+        transform: value ? 'translateX(20px)' : 'translateX(0)', transition: 'transform 0.3s',
+      }} />
+    </button>
+  );
+
+  return (
+    <div className="page-content">
+      <div className="card" style={{ marginBottom: '24px', padding: '20px', display: 'flex', alignItems: 'center', gap: '14px', borderRadius: '14px' }}>
+        <div style={{
+          width: '48px', height: '48px', borderRadius: '50%', background: 'var(--green-gradient)',
+          color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px', fontWeight: 700, flexShrink: 0,
+        }}>JD</div>
+        <div>
+          <p style={{ fontWeight: 600, marginBottom: '2px', fontSize: '15px' }}>John Doe</p>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>john@example.com</p>
+        </div>
+      </div>
+
+      <h2 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>INSTANT DEPOSIT BONUS</h2>
+      <div className="card" style={{ padding: '20px', marginBottom: '12px', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+          <span style={{ fontSize: '28px' }}>⚡</span>
+          <div>
+            <p style={{ fontWeight: 700, fontSize: '15px' }}>Deposit more, spin more</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Every $500 deposited = 1 instant bonus spin</p>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+          {depositBonusTiers.map((tier, idx) => (
+            <div key={idx} style={{
+              textAlign: 'center', padding: '14px 4px', borderRadius: '12px',
+              background: idx === 2 ? 'var(--green-glow)' : 'var(--bg-primary)',
+              border: `1px solid ${idx === 2 ? 'rgba(0,220,130,0.3)' : 'var(--border)'}`,
+            }}>
+              <p style={{ fontSize: '20px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: idx === 2 ? 'var(--green-primary)' : 'var(--text-primary)', marginBottom: '2px' }}>{tier.spins}</p>
+              <p style={{ fontSize: '9px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.3px', marginBottom: '4px' }}>SPINS</p>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: idx === 2 ? 'var(--green-primary)' : 'var(--text-secondary)' }}>{tier.label}</p>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => onNavigate('wallet')} className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+          Deposit Now
+        </button>
+      </div>
+      <p style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '28px', lineHeight: 1.5 }}>
+        Bonus spins credited instantly on deposit. $500 per spin. No purchase necessary to enter sweepstakes — see AMOE.
+      </p>
+
+      <h2 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>SETTINGS</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
+        {[{ label: 'Notifications', value: notifications, onChange: setNotifications }, { label: 'Sound Effects', value: soundEffects, onChange: (v) => { setSoundEffects(v); SoundEngine.toggle(v); if (v) SoundEngine.click(); } }, { label: 'Email Updates', value: emailUpdates, onChange: setEmailUpdates }].map((setting, idx) => (
+          <div key={idx} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+            <span>{setting.label}</span>
+            <CustomToggle value={setting.value} onChange={setting.onChange} />
+          </div>
+        ))}
+      </div>
+
+      {/* Refer Friends CTA */}
+      <button onClick={() => onNavigate('referral')} className="card card-interactive" style={{
+        width: '100%', padding: '18px 20px', marginBottom: '24px', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', gap: '14px', textAlign: 'left',
+        background: 'linear-gradient(135deg, rgba(0,220,130,0.08) 0%, rgba(0,220,130,0.02) 100%)',
+        border: '1px solid rgba(0,220,130,0.15)', borderRadius: '14px', color: 'var(--text-primary)',
+      }}>
+        <span style={{ fontSize: '32px' }}>🎁</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontWeight: 700, fontSize: '15px', marginBottom: '2px' }}>Refer Friends, Earn Spins</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Give 3 spins, get 5 for each friend who joins</p>
+        </div>
+        <span style={{ fontSize: '18px', color: 'var(--green-primary)' }}>→</span>
+      </button>
+
+      <h2 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>PRODUCTS</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
+        <button onClick={() => onNavigate('bitcoin')} className="card card-interactive" style={{
+          display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', cursor: 'pointer',
+          border: '1px solid rgba(247,147,26,0.2)', background: 'var(--bg-secondary)', borderRadius: '12px',
+          width: '100%', textAlign: 'left', color: 'var(--text-primary)',
+        }}>
+          <span style={{ fontSize: '24px' }}>₿</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: 600, fontSize: '14px' }}>Bitcoin</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Buy, sell & hold BTC</p>
+          </div>
+          <span style={{ fontSize: '10px', fontWeight: 600, color: '#F7931A', background: 'rgba(247,147,26,0.08)', padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.5px' }}>LIVE</span>
+        </button>
+        {[
+          { label: 'Borda Card', desc: 'Earn spins with every swipe', icon: '💳', page: 'card' },
+          { label: 'AI Roboadvisor', desc: 'AI-managed portfolio', icon: '🤖', page: 'roboadvisor' },
+          { label: 'Remittances', desc: 'Send money globally', icon: '🌍', page: 'remittances' },
+        ].map((item, idx) => (
+          <button key={idx} onClick={() => onNavigate(item.page)} className="card" style={{
+            display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', cursor: 'pointer',
+            border: '1px solid var(--border)', background: 'var(--bg-secondary)', borderRadius: '12px',
+            width: '100%', textAlign: 'left', color: 'var(--text-primary)',
+          }}>
+            <span style={{ fontSize: '24px' }}>{item.icon}</span>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontWeight: 600, fontSize: '14px' }}>{item.label}</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.desc}</p>
+            </div>
+            <span style={{ fontSize: '10px', fontWeight: 600, color: '#FF9900', background: 'rgba(255,153,0,0.08)', padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.5px' }}>SOON</span>
+          </button>
+        ))}
+      </div>
+
+      <h2 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px' }}>LEGAL</h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
+        <button onClick={onShowRules} className="card" style={{
+          display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', cursor: 'pointer',
+          border: '1px solid var(--border)', background: 'var(--bg-secondary)', borderRadius: '12px',
+          width: '100%', textAlign: 'left', color: 'var(--text-primary)',
+        }}>
+          <span style={{ fontSize: '18px' }}>📜</span>
+          <p style={{ fontWeight: 500, fontSize: '14px' }}>Official Sweepstakes Rules</p>
+        </button>
+        <button onClick={() => window.open('/chances.html', '_blank')} className="card" style={{
+          display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', cursor: 'pointer',
+          border: '1px solid var(--border)', background: 'var(--bg-secondary)', borderRadius: '12px',
+          width: '100%', textAlign: 'left', color: 'var(--text-primary)', textDecoration: 'none',
+        }}>
+          <span style={{ fontSize: '18px' }}>🎲</span>
+          <p style={{ fontWeight: 500, fontSize: '14px' }}>Winning Chances & Odds</p>
+          <span style={{ marginLeft: 'auto', fontSize: '14px', color: 'var(--text-muted)' }}>↗</span>
+        </button>
+      </div>
+
+      {/* ==================== AUDIT DASHBOARD ==================== */}
+      <AuditDashboard />
+
+      <button onClick={() => window.location.reload()} className="btn btn-secondary" style={{ width: '100%' }}>Log Out</button>
+    </div>
+  );
+};
+
+// ==================== LIVE ACTIVITY FEED ====================
+const FIRST_NAMES = ['Alex', 'Jordan', 'Sam', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Quinn', 'Avery', 'Jamie', 'Drew', 'Devon', 'Kai', 'Reese', 'Blake', 'Charlie', 'Skyler', 'Peyton', 'Dakota', 'Rowan'];
+const STATES = ['New York', 'California', 'Texas', 'Florida', 'New Jersey', 'Illinois', 'Georgia', 'Ohio', 'Pennsylvania', 'Virginia', 'Colorado', 'Arizona', 'Tennessee', 'Michigan', 'Washington'];
+
+const LiveActivityFeed = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [dismissed, setDismissed] = useState(false);
+  const dismissedUntilRef = useRef(0); // timestamp — suppress until this time
+  const idRef = useRef(0);
+
+  const generateNotification = useCallback(() => {
+    const name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
+    const state = STATES[Math.floor(Math.random() * STATES.length)];
+    const stock = STOCKS[Math.floor(Math.random() * STOCKS.length)];
+    const shares = Math.floor(Math.random() * 10) + 1;
+    idRef.current += 1;
+    return {
+      id: idRef.current,
+      text: `${name} in ${state} just won ${shares} share${shares > 1 ? 's' : ''} of $${stock.ticker}`,
+      color: stock.color,
+      ticker: stock.ticker,
+      time: Date.now(),
+    };
+  }, []);
+
+  useEffect(() => {
+    const initialTimer = setTimeout(() => {
+      setNotifications([generateNotification()]);
+    }, 2000);
+
+    const interval = setInterval(() => {
+      setNotifications(prev => {
+        const next = [generateNotification(), ...prev.slice(0, 4)];
+        return next;
+      });
+      // Auto-show again after 30s cooldown
+      if (Date.now() > dismissedUntilRef.current) {
+        setDismissed(false);
+      }
+    }, 4000 + Math.random() * 4000);
+
+    return () => { clearTimeout(initialTimer); clearInterval(interval); };
+  }, [generateNotification]);
+
+  const handleDismiss = useCallback((e) => {
+    e.stopPropagation();
+    setDismissed(true);
+    dismissedUntilRef.current = Date.now() + 30000; // suppress for 30s
+  }, []);
+
+  if (notifications.length === 0 || dismissed) return null;
+  const latest = notifications[0];
+
+  return (
+    <div key={latest.id} style={{
+      position: 'fixed',
+      ...(isMobileCheck()
+        ? { top: '12px', left: '12px', right: '12px', bottom: 'auto' }
+        : { bottom: '24px', left: '24px', right: 'auto' }),
+      zIndex: 60, maxWidth: '400px',
+      animation: isMobileCheck() ? 'fadeInUp 0.4s ease' : 'slideInFromRight 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
+    }}>
+      <div style={{
+        background: 'var(--bg-secondary)', border: '1px solid var(--border-hover)',
+        borderRadius: '14px', padding: '14px 18px',
+        display: 'flex', alignItems: 'center', gap: '12px',
+        boxShadow: '0 12px 40px var(--card-hover-shadow), 0 0 0 1px var(--border)',
+        backdropFilter: 'blur(16px)',
+        position: 'relative',
+      }}>
+        {/* Dismiss button */}
+        <button onClick={handleDismiss} style={{
+          position: 'absolute', top: '-8px', right: '-8px',
+          width: '22px', height: '22px', borderRadius: '50%',
+          background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+          color: 'var(--text-muted)', fontSize: '12px', fontWeight: 700,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', lineHeight: 1, padding: 0,
+          transition: 'all 0.15s ease',
+        }}
+        onMouseEnter={e => { e.target.style.background = 'var(--red-primary)'; e.target.style.color = '#fff'; e.target.style.borderColor = 'var(--red-primary)'; }}
+        onMouseLeave={e => { e.target.style.background = 'var(--bg-tertiary)'; e.target.style.color = 'var(--text-muted)'; e.target.style.borderColor = 'var(--border)'; }}
+        >
+          ✕
+        </button>
+        <div style={{
+          width: '10px', height: '10px', borderRadius: '50%',
+          background: 'var(--green-primary)', flexShrink: 0,
+          boxShadow: '0 0 12px var(--green-primary)',
+          animation: 'pulseGlow 2s ease infinite',
+        }} />
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: '1.4', fontWeight: 500 }}>
+            {latest.text}
+          </p>
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            Just now
+          </p>
+        </div>
+        <div style={{ fontSize: '18px', flexShrink: 0 }}>
+          🎉
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const isMobileCheck = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+
+// ==================== STYLE INJECTOR ====================
+const StyleInjector = ({ theme }) => {
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = globalStyles;
+    document.head.appendChild(styleElement);
+    return () => document.head.removeChild(styleElement);
+  }, []);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.body.style.background = theme === 'light' ? '#F8F9FB' : '#0B0E11';
+    document.body.style.color = theme === 'light' ? '#1A1D24' : '#EAECEF';
+  }, [theme]);
+  return null;
+};
+
+// ==================== WALLET / DEPOSIT SCREEN ====================
+const WalletScreen = ({ cashBalance, savingsBalance, spins, portfolioValue = 0, onNavigate, onDeposit, onWithdraw }) => {
+  const [depositAmount, setDepositAmount] = useState('');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [activeTab, setActiveTab] = useState('overview'); // overview, deposit, withdraw
+  const [depositMethod, setDepositMethod] = useState('ach_push');
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(null); // { type, amount, spinsEarned }
+
+  const dailySpinRate = calculateDailySpins(savingsBalance, 0, portfolioValue);
+  const totalBalance = savingsBalance + cashBalance;
+
+  const handleDeposit = () => {
+    const amount = parseFloat(depositAmount);
+    if (!amount || amount <= 0) return;
+    setPendingAction({ type: 'deposit', amount, method: depositMethod });
+    setShowConfirm(true);
+  };
+
+  const handleWithdraw = () => {
+    const amount = parseFloat(withdrawAmount);
+    if (!amount || amount <= 0 || amount > totalBalance) return;
+    setPendingAction({ type: 'withdraw', amount, method: depositMethod });
+    setShowConfirm(true);
+  };
+
+  const confirmAction = () => {
+    if (pendingAction?.type === 'deposit') {
+      onDeposit(pendingAction.amount, pendingAction.method);
+      const newBalance = savingsBalance + pendingAction.amount;
+      const newSpins = calculateDailySpins(newBalance, 0, portfolioValue);
+      const bonusSpins = Math.floor(pendingAction.amount / 500);
+      setShowSuccess({ type: 'deposit', amount: pendingAction.amount, spinsEarned: newSpins.total, bonusSpins });
+      setDepositAmount('');
+    } else if (pendingAction?.type === 'withdraw') {
+      onWithdraw(pendingAction.amount, pendingAction.method);
+      setShowSuccess({ type: 'withdraw', amount: pendingAction.amount });
+      setWithdrawAmount('');
+    }
+    setShowConfirm(false);
+    setPendingAction(null);
+    setTimeout(() => { setShowSuccess(null); setActiveTab('overview'); }, 3000);
+  };
+
+  return (
+    <div className="page-content">
+      {/* Balance hero */}
+      <div className="card" style={{ padding: '28px 24px', marginBottom: '20px', textAlign: 'center', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)' }}>
+        <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '1px', marginBottom: '8px' }}>TOTAL BALANCE</p>
+        <p style={{ fontSize: '42px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: 'var(--text-primary)', marginBottom: '4px' }}>
+          ${totalBalance.toFixed(2)}
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '16px', flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px' }}>SAVINGS</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--green-primary)' }}>${savingsBalance.toFixed(2)}</p>
+          </div>
+          <div style={{ width: '1px', background: 'var(--border)' }} />
+          <div>
+            <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px' }}>CASH</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>${cashBalance.toFixed(2)}</p>
+          </div>
+          <div style={{ width: '1px', background: 'var(--border)' }} />
+          <div>
+            <p style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 500, letterSpacing: '0.5px' }}>DAILY SPINS</p>
+            <p style={{ fontSize: '18px', fontWeight: 700, color: '#FF9900' }}>{dailySpinRate.total.toFixed(2)}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Spin earning explainer */}
+      <div className="card" style={{ padding: '16px', marginBottom: '20px', background: 'rgba(0, 220, 130, 0.04)', border: '1px solid rgba(0, 220, 130, 0.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '24px' }}>🎰</span>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+              Earn {dailySpinRate.total.toFixed(2)} spins daily
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+              Every $1,000 saved = 1 spin per day. The more you save, the more you play!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab switcher */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '20px' }}>
+        {[
+          { id: 'overview', label: 'Overview' },
+          { id: 'deposit', label: 'Deposit' },
+          { id: 'withdraw', label: 'Withdraw' },
+          { id: 'transfer', label: 'Transfer' },
+        ].map(tab => (
+          <button key={tab.id} onClick={() => { SoundEngine.click(); setActiveTab(tab.id); }} className={activeTab === tab.id ? 'btn btn-primary' : 'btn btn-secondary'} style={{ padding: '10px', fontSize: '12px', fontWeight: 600 }}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'overview' && (
+        <>
+          {/* Savings tier */}
+          <div className="card" style={{ padding: '20px', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px', letterSpacing: '0.5px' }}>SAVINGS TIERS</h3>
+            {[
+              { min: 0, label: '$0 – $999', spins: '0 spins/day', active: savingsBalance < 1000 },
+              { min: 1000, label: '$1,000 – $4,999', spins: '1–4 spins/day', active: savingsBalance >= 1000 && savingsBalance < 5000 },
+              { min: 5000, label: '$5,000 – $9,999', spins: '5–9 spins/day', active: savingsBalance >= 5000 && savingsBalance < 10000 },
+              { min: 10000, label: '$10,000+', spins: '10+ spins/day + 1× monthly bonus', active: savingsBalance >= 10000, premium: true },
+            ].map((tier, idx) => (
+              <div key={idx} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '10px 12px', borderRadius: '8px', marginBottom: '6px',
+                background: tier.active ? (tier.premium ? 'rgba(255, 153, 0, 0.06)' : 'rgba(0, 220, 130, 0.06)') : 'transparent',
+                border: tier.active ? (tier.premium ? '1px solid rgba(255, 153, 0, 0.2)' : '1px solid rgba(0, 220, 130, 0.15)') : '1px solid transparent',
+              }}>
+                <span style={{ fontSize: '13px', fontWeight: tier.active ? 600 : 400, color: tier.active ? (tier.premium ? '#FF9900' : 'var(--green-primary)') : 'var(--text-secondary)' }}>
+                  {tier.active && '● '}{tier.premium ? '🔥 ' : ''}{tier.label}
+                </span>
+                <span style={{ fontSize: '11px', color: tier.premium ? '#FF9900' : 'var(--text-muted)', fontWeight: tier.premium ? 600 : 400 }}>{tier.spins}</span>
+              </div>
+            ))}
+            {savingsBalance >= 10000 && (
+              <div style={{ marginTop: '10px', padding: '10px 14px', borderRadius: '10px', background: 'linear-gradient(135deg, rgba(255,153,0,0.06), rgba(255,153,0,0.02))', border: '1px solid rgba(255,153,0,0.12)' }}>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: '#FF9900', marginBottom: '4px' }}>🏆 Tier 10 Monthly Bonus Active</p>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  At month's end, you'll receive a <strong style={{ color: '#FF9900' }}>1× bonus</strong> on all spins earned this month. Keep your balance above $10K to qualify!
+                </p>
+              </div>
+            )}
+            {savingsBalance < 10000 && savingsBalance >= 5000 && (
+              <div style={{ marginTop: '8px', padding: '8px 12px', borderRadius: '8px', background: 'var(--bg-tertiary)' }}>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  💡 ${(10000 - savingsBalance).toLocaleString()} more to unlock Tier 10's <strong>monthly bonus multiplier</strong>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Quick actions */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <button onClick={() => setActiveTab('deposit')} className="btn btn-primary" style={{ padding: '14px', fontSize: '14px' }}>
+              Deposit Funds
+            </button>
+            <button onClick={() => setActiveTab('withdraw')} className="btn btn-secondary" style={{ padding: '14px', fontSize: '14px' }}>
+              Withdraw
+            </button>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'deposit' && (
+        <div className="card" style={{ padding: '20px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '16px', letterSpacing: '0.5px' }}>DEPOSIT FUNDS</h3>
+
+          {/* Method selector */}
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.5px' }}>FUNDING METHOD</p>
+          <div style={{ display: 'grid', gap: '8px', marginBottom: '16px' }}>
+            {[
+              { id: 'ach_push', label: 'ACH Transfer', desc: '1-3 business days', icon: '🏦' },
+              { id: 'wire', label: 'Wire Transfer', desc: 'Same day', icon: '⚡' },
+              { id: 'ach_pull', label: 'Bank Link (Plaid)', desc: 'Coming soon', icon: '🔗', disabled: true },
+            ].map(m => (
+              <button key={m.id} disabled={m.disabled} onClick={() => setDepositMethod(m.id)} style={{
+                display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '10px',
+                background: depositMethod === m.id ? 'rgba(0, 220, 130, 0.06)' : 'var(--bg-secondary)',
+                border: depositMethod === m.id ? '1px solid rgba(0, 220, 130, 0.2)' : '1px solid var(--border)',
+                cursor: m.disabled ? 'not-allowed' : 'pointer', opacity: m.disabled ? 0.4 : 1,
+                width: '100%', textAlign: 'left', color: 'var(--text-primary)',
+              }}>
+                <span style={{ fontSize: '20px' }}>{m.icon}</span>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: 600 }}>{m.label}</p>
+                  <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{m.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Amount input */}
+          <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.5px' }}>AMOUNT</p>
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: 'var(--text-secondary)', fontWeight: 600 }}>$</span>
+            <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="0.00"
+              style={{ width: '100%', padding: '14px 14px 14px 32px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif", outline: 'none' }}
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+            {[
+              { amt: 100, bonus: 0 },
+              { amt: 500, bonus: 1 },
+              { amt: 1000, bonus: 2 },
+              { amt: 5000, bonus: 10 },
+            ].map(({ amt, bonus }) => (
+              <button key={amt} onClick={() => { SoundEngine.click(); setDepositAmount(String(amt)); }} style={{
+                flex: 1, padding: bonus > 0 ? '10px 4px 8px' : '12px 4px', fontSize: '13px', fontWeight: 700,
+                borderRadius: '12px', cursor: 'pointer', transition: 'all 0.2s', position: 'relative',
+                border: depositAmount === String(amt) ? '2px solid var(--green-primary)' : '1px solid var(--border)',
+                background: depositAmount === String(amt) ? 'rgba(0,220,130,0.08)' : 'var(--bg-primary)',
+                color: depositAmount === String(amt) ? 'var(--green-primary)' : 'var(--text-primary)',
+                boxShadow: depositAmount === String(amt) ? '0 0 12px rgba(0,220,130,0.15)' : 'none',
+              }}>
+                {bonus > 0 && (
+                  <span style={{
+                    position: 'absolute', top: '-8px', right: '-4px',
+                    background: 'var(--green-gradient)', color: '#000',
+                    fontSize: '9px', fontWeight: 800, padding: '2px 6px',
+                    borderRadius: '8px', letterSpacing: '0.3px',
+                    boxShadow: '0 2px 8px rgba(0,220,130,0.3)',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    +{bonus} 🎰
+                  </span>
+                )}
+                <span style={{ display: 'block', fontFamily: "'Space Grotesk', sans-serif" }}>${amt >= 1000 ? `${amt / 1000}K` : amt}</span>
+                {bonus > 0 && (
+                  <span style={{ display: 'block', fontSize: '9px', fontWeight: 600, color: 'var(--green-primary)', marginTop: '2px', opacity: 0.8 }}>
+                    {bonus} bonus spin{bonus !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {depositAmount && parseFloat(depositAmount) > 0 && (
+            <div style={{ padding: '12px 14px', borderRadius: '10px', background: parseFloat(depositAmount) >= 500 ? 'rgba(0, 220, 130, 0.06)' : 'var(--bg-tertiary)', border: `1px solid ${parseFloat(depositAmount) >= 500 ? 'rgba(0, 220, 130, 0.15)' : 'var(--border)'}`, marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '2px' }}>
+                  Daily spin rate: <strong style={{ color: 'var(--green-primary)' }}>+{(parseFloat(depositAmount) / 1000).toFixed(2)}/day</strong>
+                </p>
+                {Math.floor(parseFloat(depositAmount) / 500) > 0 && (
+                  <p style={{ fontSize: '12px', color: 'var(--green-primary)', fontWeight: 600 }}>
+                    🎰 +{Math.floor(parseFloat(depositAmount) / 500)} instant bonus spin{Math.floor(parseFloat(depositAmount) / 500) !== 1 ? 's' : ''}!
+                  </p>
+                )}
+              </div>
+              {Math.floor(parseFloat(depositAmount) / 500) > 0 && (
+                <span style={{ fontSize: '28px', animation: 'pulseGlow 1.5s ease infinite' }}>🎰</span>
+              )}
+            </div>
+          )}
+
+          <button onClick={handleDeposit} disabled={!depositAmount || parseFloat(depositAmount) <= 0} className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+            {depositMethod === 'wire' ? 'Get Wire Instructions' : 'Initiate Deposit'}
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'withdraw' && (
+        <div className="card" style={{ padding: '20px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '16px', letterSpacing: '0.5px' }}>WITHDRAW FUNDS</h3>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+            Available to withdraw: <strong style={{ color: 'var(--text-primary)' }}>${totalBalance.toFixed(2)}</strong>
+          </p>
+
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', fontSize: '18px', color: 'var(--text-secondary)', fontWeight: 600 }}>$</span>
+            <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} placeholder="0.00" max={totalBalance}
+              style={{ width: '100%', padding: '14px 14px 14px 32px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600, fontFamily: "'Space Grotesk', sans-serif", outline: 'none' }}
+            />
+          </div>
+
+          <button onClick={() => setWithdrawAmount(String(totalBalance.toFixed(2)))} className="btn btn-secondary" style={{ width: '100%', padding: '8px', fontSize: '12px', marginBottom: '16px' }}>
+            Withdraw All
+          </button>
+
+          {parseFloat(withdrawAmount) > 0 && savingsBalance > 0 && (
+            <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255, 104, 56, 0.06)', border: '1px solid rgba(255, 104, 56, 0.1)', marginBottom: '16px' }}>
+              <p style={{ fontSize: '12px', color: 'var(--red-primary)' }}>
+                Withdrawing savings will reduce your daily spin rate.
+              </p>
+            </div>
+          )}
+
+          <button onClick={handleWithdraw} disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > totalBalance} className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+            Initiate Withdrawal
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'transfer' && (
+        <div className="card" style={{ padding: '20px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px', letterSpacing: '0.5px' }}>ACAT TRANSFER IN</h3>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.6 }}>
+            Transfer your brokerage account to Borda via ACAT (Automated Customer Account Transfer). Move your stocks in and earn <strong style={{ color: '#FF9900' }}>5× the transfer value as bonus spins</strong>.
+          </p>
+
+          {/* 5x bonus explainer */}
+          <div style={{ padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(255,153,0,0.06), rgba(255,153,0,0.02))', border: '1px solid rgba(255,153,0,0.15)', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '28px' }}>🎰</span>
+              <div>
+                <p style={{ fontSize: '15px', fontWeight: 700, color: '#FF9900' }}>5× Spin Bonus on Transfers</p>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Transfer $10K in stocks → get 50 bonus spins instantly</p>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '10px' }}>
+              {[
+                { value: '$1K', spins: '5 spins' },
+                { value: '$10K', spins: '50 spins' },
+                { value: '$50K', spins: '250 spins' },
+              ].map(ex => (
+                <div key={ex.value} style={{ textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'rgba(255,153,0,0.04)' }}>
+                  <p style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>{ex.value}</p>
+                  <p style={{ fontSize: '11px', fontWeight: 600, color: '#FF9900' }}>+{ex.spins}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Transfer form */}
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>SENDING BROKERAGE</label>
+            <select style={{
+              width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)',
+              background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none',
+            }}>
+              <option value="">Select your current brokerage</option>
+              <option value="robinhood">Robinhood</option>
+              <option value="schwab">Charles Schwab</option>
+              <option value="fidelity">Fidelity</option>
+              <option value="etrade">E*TRADE</option>
+              <option value="tdameritrade">TD Ameritrade</option>
+              <option value="webull">Webull</option>
+              <option value="vanguard">Vanguard</option>
+              <option value="merrill">Merrill Edge</option>
+              <option value="interactive">Interactive Brokers</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>TRANSFER TYPE</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button className="btn btn-secondary" style={{ padding: '12px', fontSize: '13px', fontWeight: 600, border: '2px solid var(--green-primary)', background: 'rgba(0,220,130,0.06)' }}>
+                📦 Full Account
+              </button>
+              <button className="btn btn-secondary" style={{ padding: '12px', fontSize: '13px', fontWeight: 600 }}>
+                📋 Partial Transfer
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>ACCOUNT NUMBER AT SENDING BROKERAGE</label>
+            <input type="text" placeholder="Enter your account number" style={{
+              width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)',
+              background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '14px', outline: 'none',
+            }} />
+          </div>
+
+          <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'var(--bg-tertiary)', marginBottom: '20px' }}>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              ⏱ ACAT transfers typically take 5–8 business days. Your spin bonus is credited once the transfer settles. Powered by Alpaca Securities LLC, FINRA/SIPC member.
+            </p>
+          </div>
+
+          <button className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+            Start ACAT Transfer
+          </button>
+
+          <p style={{ fontSize: '10px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '12px' }}>
+            By initiating a transfer, you authorize Alpaca Securities to receive your assets via ACAT.
+          </p>
+        </div>
+      )}
+
+      {/* Confirmation modal */}
+      {showConfirm && pendingAction && (
+        <div className="modal-overlay" onClick={() => setShowConfirm(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', textAlign: 'center' }}>
+              Confirm {pendingAction.type === 'deposit' ? 'Deposit' : 'Withdrawal'}
+            </h3>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <p style={{ fontSize: '36px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: pendingAction.type === 'deposit' ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+                ${pendingAction.amount.toFixed(2)}
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                via {pendingAction.method === 'ach_push' ? 'ACH Transfer' : pendingAction.method === 'wire' ? 'Wire Transfer' : 'Bank Link'}
+              </p>
+              {pendingAction.type === 'deposit' && pendingAction.amount >= 500 && (
+                <p style={{ fontSize: '13px', color: '#FF9900', fontWeight: 600, marginTop: '8px' }}>
+                  ⚡ +{Math.floor(pendingAction.amount / 500)} instant bonus spin{Math.floor(pendingAction.amount / 500) > 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+            <div style={{ display: 'grid', gap: '10px' }}>
+              <button onClick={confirmAction} className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
+                Confirm
+              </button>
+              <button onClick={() => setShowConfirm(false)} className="btn btn-secondary" style={{ width: '100%', padding: '12px' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deposit/Withdraw success celebration */}
+      {showSuccess && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ textAlign: 'center', animation: 'fadeInScale 0.4s ease' }}>
+            <div style={{ fontSize: '64px', marginBottom: '16px', animation: 'pulseGlow 1s ease 2' }}>
+              {showSuccess.type === 'deposit' ? '🎉' : '✅'}
+            </div>
+            <h3 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '8px', color: showSuccess.type === 'deposit' ? 'var(--green-primary)' : 'var(--text-primary)' }}>
+              {showSuccess.type === 'deposit' ? 'Deposit Successful!' : 'Withdrawal Submitted'}
+            </h3>
+            <p style={{ fontSize: '32px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", marginBottom: '12px' }}>
+              ${showSuccess.amount.toFixed(2)}
+            </p>
+            {showSuccess.type === 'deposit' && showSuccess.bonusSpins > 0 && (
+              <div style={{ background: 'rgba(255,153,0,0.08)', border: '1px solid rgba(255,153,0,0.2)', borderRadius: '12px', padding: '12px', marginBottom: '8px' }}>
+                <p style={{ fontSize: '16px', fontWeight: 700, color: '#FF9900' }}>
+                  ⚡ +{showSuccess.bonusSpins} instant bonus spin{showSuccess.bonusSpins > 1 ? 's' : ''}!
+                </p>
+              </div>
+            )}
+            {showSuccess.type === 'deposit' && showSuccess.spinsEarned > 0 && (
+              <div style={{ background: 'var(--green-glow)', border: '1px solid rgba(0, 220, 130, 0.2)', borderRadius: '12px', padding: '12px', marginBottom: '8px' }}>
+                <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--green-primary)' }}>
+                  You now earn {showSuccess.spinsEarned.toFixed(2)} spins/day
+                </p>
+              </div>
+            )}
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>This screen will close automatically</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==================== REFERRAL SCREEN ====================
+const ReferralScreen = ({ onNavigate, spins }) => {
+  const [referralCode] = useState(() => {
+    let code = '';
+    try { code = localStorage.getItem('borda_referral_code'); } catch {}
+    if (!code) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      code = 'BORDA-';
+      for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      try { localStorage.setItem('borda_referral_code', code); } catch {}
+    }
+    return code;
+  });
+  const [referralCount] = useState(() => {
+    try { return parseInt(localStorage.getItem('borda_referral_count')) || 0; } catch { return 0; }
+  });
+  const [copied, setCopied] = useState(false);
+
+  const referralLink = `https://playborda.com/waitlist?ref=${referralCode}`;
+  const shareText = `I'm using Borda to win real stocks just by saving! Join with my link and get bonus spins:`;
+
+  const milestones = [
+    { count: 3, reward: '+5 spins', icon: '🎰' },
+    { count: 5, reward: 'Skip 500', icon: '⚡' },
+    { count: 10, reward: '+15 spins', icon: '🔥' },
+    { count: 25, reward: 'VIP', icon: '👑' },
+  ];
+
+  const handleCopy = () => {
+    navigator.clipboard?.writeText(referralLink);
+    setCopied(true);
+    if (navigator.vibrate) navigator.vibrate(30);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: 'Join Borda', text: shareText, url: referralLink }).catch(() => {});
+    } else {
+      handleCopy();
+    }
+  };
+
+  return (
+    <div className="page-content">
+      {/* Hero */}
+      <div className="card" style={{ padding: '28px 24px', marginBottom: '20px', textAlign: 'center', background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)' }}>
+        <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎁</div>
+        <h2 style={{ fontSize: '22px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", marginBottom: '8px' }}>
+          Give Spins, Get Spins
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          Invite friends to Borda. They get 3 bonus spins, you get 5. Everyone wins.
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px', marginBottom: '4px' }}>REFERRALS</p>
+          <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: 'var(--green-primary)' }}>{referralCount}</p>
+        </div>
+        <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px', marginBottom: '4px' }}>SPINS EARNED</p>
+          <p style={{ fontSize: '28px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", color: '#FF9900' }}>{referralCount * 5}</p>
+        </div>
+      </div>
+
+      {/* Referral Link */}
+      <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
+        <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px', marginBottom: '10px' }}>YOUR REFERRAL LINK</p>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <div style={{ flex: 1, padding: '12px 14px', borderRadius: '12px', background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '12px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {referralLink}
+          </div>
+          <button onClick={handleCopy} className="btn" style={{
+            padding: '12px 18px', borderRadius: '12px', fontSize: '13px', fontWeight: 700,
+            background: copied ? 'var(--green-primary)' : 'transparent',
+            color: copied ? 'var(--bg-primary)' : 'var(--green-primary)',
+            border: `1px solid ${copied ? 'var(--green-primary)' : 'var(--green-primary)'}`,
+          }}>
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+
+        {/* Share buttons */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(referralLink)}`} target="_blank" rel="noopener noreferrer"
+            className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', fontSize: '13px', textDecoration: 'none' }}>
+            Post on X
+          </a>
+          <a href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + referralLink)}`} target="_blank" rel="noopener noreferrer"
+            className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', fontSize: '13px', textDecoration: 'none' }}>
+            WhatsApp
+          </a>
+          <a href={`sms:?body=${encodeURIComponent(shareText + ' ' + referralLink)}`}
+            className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', fontSize: '13px', textDecoration: 'none' }}>
+            Text
+          </a>
+          <button onClick={handleShare} className="btn btn-primary" style={{ padding: '10px', fontSize: '13px' }}>
+            Share
+          </button>
+        </div>
+      </div>
+
+      {/* Milestones */}
+      <div className="card" style={{ padding: '20px', marginBottom: '20px' }}>
+        <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px', marginBottom: '14px' }}>MILESTONES</p>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {milestones.map((m, i) => {
+            const achieved = referralCount >= m.count;
+            return (
+              <div key={i} style={{
+                flex: 1, textAlign: 'center', padding: '12px 4px', borderRadius: '12px',
+                background: achieved ? 'var(--green-glow)' : 'var(--bg-primary)',
+                border: `1px solid ${achieved ? 'rgba(0,220,130,0.3)' : 'var(--border)'}`,
+                transition: 'all 0.3s',
+              }}>
+                <div style={{ fontSize: '20px', marginBottom: '4px' }}>{m.icon}</div>
+                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '16px', fontWeight: 800, color: achieved ? 'var(--green-primary)' : 'var(--text-muted)' }}>{m.count}</div>
+                <div style={{ fontSize: '9px', color: achieved ? 'var(--text-secondary)' : 'var(--text-muted)', fontWeight: 500, marginTop: '2px' }}>{m.reward}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="card" style={{ padding: '20px' }}>
+        <p style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.8px', marginBottom: '14px' }}>HOW IT WORKS</p>
+        {[
+          { step: '1', title: 'Share your link', desc: 'Send your unique link to friends via text, social, or email' },
+          { step: '2', title: 'Friend joins', desc: 'They sign up and make their first deposit' },
+          { step: '3', title: 'Both earn spins', desc: 'You get 5 spins, they get 3 bonus spins' },
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px 0', borderTop: i > 0 ? '1px solid var(--border)' : 'none' }}>
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '8px', flexShrink: 0,
+              background: 'var(--green-glow)', border: '1px solid rgba(0,220,130,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '13px', color: 'var(--green-primary)',
+            }}>{item.step}</div>
+            <div>
+              <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{item.title}</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ==================== BITCOIN SCREEN ====================
+const BTC_MARKUP = 0.0015; // 0.15% fee on buys and sells
+const BTC_SPINS_PER_1K = 5; // 5 free spins per $1,000 transacted
+
+const BitcoinScreen = ({ onNavigate, savingsBalance, cashBalance, onUpdateSpins }) => {
+  const [btcPrice, setBtcPrice] = useState(null);
+  const [priceChange, setPriceChange] = useState(0);
+  const [priceHistory, setPriceHistory] = useState([]);
+  const [timeRange, setTimeRange] = useState('7');
+  const [tab, setTab] = useState('buy'); // buy | sell | hold
+  const [amount, setAmount] = useState('');
+  const [btcHoldings, setBtcHoldings] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('borda_btc_holdings')) || { btc: 0, costBasis: 0 }; } catch { return { btc: 0, costBasis: 0 }; }
+  });
+  const [btcTransactions, setBtcTransactions] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('borda_btc_transactions')) || []; } catch { return []; }
+  });
+  const [btcVolume, setBtcVolume] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('borda_btc_volume')) || { total: 0, rewardedAt: 0 }; } catch { return { total: 0, rewardedAt: 0 }; }
+  });
+  const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(null);
+  const [spinRewardToast, setSpinRewardToast] = useState(null);
+  const chartRef = useRef(null);
+
+  // Fetch BTC price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const res = await fetch('/api/bitcoin/price', { signal: AbortSignal.timeout(3000) });
+        if (res.ok) {
+          const data = await res.json();
+          setBtcPrice(data.price);
+          setPriceChange(data.change24h);
+        } else {
+          // Fallback simulated price
+          setBtcPrice(67842.50);
+          setPriceChange(2.34);
+        }
+      } catch {
+        setBtcPrice(67842.50);
+        setPriceChange(2.34);
+      }
+      setLoading(false);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch price history for chart
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`/api/bitcoin/history?days=${timeRange}`, { signal: AbortSignal.timeout(3000) });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.prices) setPriceHistory(data.prices);
+        } else {
+          // Generate simulated history
+          const base = 67842.50;
+          const pts = timeRange === '1' ? 24 : timeRange === '7' ? 168 : timeRange === '30' ? 720 : 365;
+          const sim = [];
+          let p = base * 0.95;
+          for (let i = 0; i < pts; i++) {
+            p += (Math.random() - 0.48) * (base * 0.005);
+            sim.push([Date.now() - (pts - i) * 3600000, Math.max(p, base * 0.85)]);
+          }
+          setPriceHistory(sim);
+        }
+      } catch {
+        const base = 67842.50;
+        const pts = timeRange === '1' ? 24 : timeRange === '7' ? 168 : 60;
+        const sim = [];
+        let p = base * 0.95;
+        for (let i = 0; i < pts; i++) {
+          p += (Math.random() - 0.48) * (base * 0.005);
+          sim.push([Date.now() - (pts - i) * 3600000, Math.max(p, base * 0.85)]);
+        }
+        setPriceHistory(sim);
+      }
+    };
+    fetchHistory();
+  }, [timeRange]);
+
+  // Persist holdings
+  useEffect(() => {
+    localStorage.setItem('borda_btc_holdings', JSON.stringify(btcHoldings));
+  }, [btcHoldings]);
+  useEffect(() => {
+    localStorage.setItem('borda_btc_transactions', JSON.stringify(btcTransactions));
+  }, [btcTransactions]);
+  useEffect(() => {
+    localStorage.setItem('borda_btc_volume', JSON.stringify(btcVolume));
+  }, [btcVolume]);
+
+  // Award spins when cumulative BTC volume crosses $1K thresholds
+  // Side effects (onUpdateSpins, toast) must happen OUTSIDE the setState updater
+  const awardVolumeSpins = useCallback((usdAmount) => {
+    setBtcVolume(prev => {
+      const newTotal = prev.total + usdAmount;
+      const newMilestones = Math.floor(newTotal / 1000);
+      const oldMilestones = Math.floor(prev.rewardedAt / 1000);
+      const milestonesEarned = newMilestones - oldMilestones;
+      return { total: newTotal, rewardedAt: milestonesEarned > 0 ? newMilestones * 1000 : prev.rewardedAt, _pendingSpins: milestonesEarned > 0 ? milestonesEarned * BTC_SPINS_PER_1K : 0 };
+    });
+  }, []);
+
+  // Process pending spin rewards outside of setState updater (React-safe)
+  useEffect(() => {
+    if (btcVolume._pendingSpins > 0 && onUpdateSpins) {
+      const spins = btcVolume._pendingSpins;
+      onUpdateSpins(spins);
+      SoundEngine.coin();
+      setSpinRewardToast(spins);
+      setTimeout(() => setSpinRewardToast(null), 4000);
+      // Clear the pending flag
+      setBtcVolume(prev => ({ total: prev.total, rewardedAt: prev.rewardedAt }));
+    }
+  }, [btcVolume._pendingSpins, onUpdateSpins]);
+
+  const btcValue = btcHoldings.btc * (btcPrice || 0);
+  const pnl = btcValue - btcHoldings.costBasis;
+  const pnlPct = btcHoldings.costBasis > 0 ? (pnl / btcHoldings.costBasis * 100) : 0;
+
+  const handleBuy = () => {
+    const usd = parseFloat(amount);
+    if (!usd || usd < 1 || !btcPrice) return;
+    const fee = usd * BTC_MARKUP;
+    const effectiveUsd = usd - fee; // less BTC received after markup
+    setConfirming({ type: 'buy', usd, btc: effectiveUsd / btcPrice, fee });
+  };
+
+  const handleSell = () => {
+    const usd = parseFloat(amount);
+    if (!usd || usd < 1 || !btcPrice) return;
+    const btcToSell = usd / btcPrice;
+    if (btcToSell > btcHoldings.btc) return;
+    const fee = usd * BTC_MARKUP;
+    const proceeds = usd - fee; // less USD received after markup
+    setConfirming({ type: 'sell', usd: proceeds, btc: btcToSell, fee, grossUsd: usd });
+  };
+
+  const confirmAction = () => {
+    if (!confirming) return;
+    const volumeUsd = confirming.type === 'buy' ? confirming.usd : (confirming.grossUsd || confirming.usd);
+    const tx = { type: confirming.type, usd: confirming.usd, btc: confirming.btc, fee: confirming.fee || 0, price: btcPrice, timestamp: new Date().toISOString() };
+
+    if (confirming.type === 'buy') {
+      setBtcHoldings(prev => ({
+        btc: prev.btc + confirming.btc,
+        costBasis: prev.costBasis + confirming.usd,
+      }));
+    } else {
+      const proportion = confirming.btc / btcHoldings.btc;
+      setBtcHoldings(prev => ({
+        btc: prev.btc - confirming.btc,
+        costBasis: Math.max(0, prev.costBasis - prev.costBasis * proportion),
+      }));
+    }
+
+    setBtcTransactions(prev => [tx, ...prev].slice(0, 50));
+    setShowSuccess(tx);
+    awardVolumeSpins(volumeUsd);
+    setConfirming(null);
+    setAmount('');
+    setTimeout(() => setShowSuccess(null), 3000);
+  };
+
+  // Mini sparkline chart
+  const renderChart = () => {
+    if (priceHistory.length < 2) return null;
+    const prices = priceHistory.map(p => p[1]);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const range = max - min || 1;
+    const w = 340;
+    const h = 120;
+    const pts = prices.map((p, i) => `${(i / (prices.length - 1)) * w},${h - ((p - min) / range) * h}`).join(' ');
+    const isUp = prices[prices.length - 1] >= prices[0];
+    const color = isUp ? 'var(--green-primary)' : 'var(--red-primary)';
+    const fillPts = `0,${h} ${pts} ${w},${h}`;
+
+    return (
+      <svg ref={chartRef} width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+        <defs>
+          <linearGradient id="btcFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <polygon points={fillPts} fill="url(#btcFill)" />
+        <polyline points={pts} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+      </svg>
+    );
+  };
+
+  const formatBtc = (btc) => btc < 0.001 ? btc.toFixed(8) : btc < 1 ? btc.toFixed(6) : btc.toFixed(4);
+
+  if (loading) {
+    return (
+      <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>₿</div>
+          <p style={{ color: 'var(--text-secondary)' }}>Loading Bitcoin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-content">
+      {/* BTC Price Header */}
+      <div style={{ textAlign: 'center', padding: '20px 16px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}>
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="#F7931A"/>
+            <path d="M21.5 14.2c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.65 2.6c-.4-.1-.85-.2-1.3-.3l.65-2.6-1.6-.4-.7 2.7c-.35-.08-.7-.16-1-.25l-2.2-.55-.45 1.7s1.2.27 1.17.29c.65.16.77.6.75.94l-.75 3.03c.04.01.1.03.17.06l-.18-.04-1.05 4.23c-.08.2-.28.49-.73.38.02.02-1.17-.3-1.17-.3L7 18.8l2.1.52c.38.1.76.2 1.13.29l-.7 2.8 1.6.4.7-2.73c.43.12.86.22 1.27.32l-.7 2.7 1.6.4.7-2.77c2.9.55 5.1.33 6-2.3.73-2.1-.04-3.32-1.56-4.12 1.1-.25 1.93-1 2.16-2.5zM19.8 17.6c-.52 2.1-4.05.96-5.2.68l.93-3.72c1.15.29 4.82.86 4.27 3.04zM20.33 14.17c-.48 1.9-3.42.94-4.37.7l.84-3.38c.96.24 4.03.69 3.53 2.68z" fill="white"/>
+          </svg>
+          <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-secondary)' }}>Bitcoin</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>BTC</span>
+        </div>
+        <h1 style={{ fontSize: '36px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif", marginBottom: '4px' }}>
+          ${btcPrice?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '—'}
+        </h1>
+        <p style={{ fontSize: '14px', fontWeight: 600, color: priceChange >= 0 ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+          {priceChange >= 0 ? '▲' : '▼'} {Math.abs(priceChange).toFixed(2)}% today
+        </p>
+      </div>
+
+      {/* Price Chart */}
+      <div className="card" style={{ margin: '16px', padding: '12px 0 0', overflow: 'hidden' }}>
+        {renderChart()}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', padding: '12px' }}>
+          {[{ l: '1D', v: '1' }, { l: '1W', v: '7' }, { l: '1M', v: '30' }, { l: '1Y', v: '365' }].map(r => (
+            <button key={r.v} onClick={() => setTimeRange(r.v)} style={{
+              padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, border: 'none', cursor: 'pointer',
+              background: timeRange === r.v ? 'var(--green-primary)' : 'transparent',
+              color: timeRange === r.v ? '#000' : 'var(--text-secondary)',
+            }}>{r.l}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Holdings Card */}
+      {btcHoldings.btc > 0 && (
+        <div className="card" style={{ margin: '0 16px 16px', padding: '16px' }}>
+          <h3 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.5px', marginBottom: '12px' }}>YOUR BITCOIN</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p style={{ fontSize: '22px', fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif" }}>
+                ${btcValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>{formatBtc(btcHoldings.btc)} BTC</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: pnl >= 0 ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+                {pnl >= 0 ? '+' : ''}{pnl.toFixed(2)} ({pnlPct.toFixed(1)}%)
+              </p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>P&L</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Buy / Sell / History Tabs */}
+      <div style={{ display: 'flex', gap: '4px', margin: '0 16px 12px', background: 'var(--bg-tertiary)', borderRadius: '10px', padding: '3px' }}>
+        {[{ l: 'Buy', k: 'buy' }, { l: 'Sell', k: 'sell' }, { l: 'Activity', k: 'history' }].map(t => (
+          <button key={t.k} onClick={() => setTab(t.k)} style={{
+            flex: 1, padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+            background: tab === t.k ? 'var(--bg-secondary)' : 'transparent',
+            color: tab === t.k ? 'var(--text-primary)' : 'var(--text-secondary)',
+            boxShadow: tab === t.k ? '0 1px 3px rgba(0,0,0,0.15)' : 'none',
+          }}>{t.l}</button>
+        ))}
+      </div>
+
+      {/* Buy Tab */}
+      {tab === 'buy' && (
+        <div style={{ padding: '0 16px 24px' }}>
+          <div className="card" style={{ padding: '20px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Amount in USD</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '28px', fontWeight: 300, color: 'var(--text-muted)' }}>$</span>
+              <input
+                type="number" inputMode="decimal" value={amount}
+                onChange={e => setAmount(e.target.value)}
+                placeholder="0.00"
+                style={{
+                  fontSize: '28px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif",
+                  background: 'transparent', border: 'none', color: 'var(--text-primary)',
+                  outline: 'none', width: '100%',
+                }}
+              />
+            </div>
+            {amount && btcPrice && (
+              <div style={{ marginBottom: '16px' }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  ≈ {formatBtc((parseFloat(amount) * (1 - BTC_MARKUP)) / btcPrice)} BTC
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  Includes 0.15% fee (${(parseFloat(amount) * BTC_MARKUP).toFixed(2)})
+                </p>
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              {['25', '50', '100', '500'].map(v => (
+                <button key={v} onClick={() => setAmount(v)} style={{
+                  flex: 1, padding: '8px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                  background: amount === v ? 'rgba(247,147,26,0.12)' : 'var(--bg-tertiary)',
+                  border: amount === v ? '1px solid #F7931A' : '1px solid var(--border)',
+                  color: amount === v ? '#F7931A' : 'var(--text-secondary)', cursor: 'pointer',
+                }}>${v}</button>
+              ))}
+            </div>
+            <button onClick={handleBuy} disabled={!amount || parseFloat(amount) < 1} className="btn" style={{
+              width: '100%', padding: '14px', fontSize: '15px', fontWeight: 700, borderRadius: '12px',
+              background: amount && parseFloat(amount) >= 1 ? 'linear-gradient(135deg, #F7931A, #E8850F)' : 'var(--bg-tertiary)',
+              color: amount && parseFloat(amount) >= 1 ? '#fff' : 'var(--text-muted)',
+              border: 'none', cursor: amount && parseFloat(amount) >= 1 ? 'pointer' : 'not-allowed',
+            }}>
+              Buy Bitcoin
+            </button>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '10px' }}>
+              Powered by Lightspark • 0.15% fee • Earn 5 spins per $1K traded
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Sell Tab */}
+      {tab === 'sell' && (
+        <div style={{ padding: '0 16px 24px' }}>
+          <div className="card" style={{ padding: '20px' }}>
+            {btcHoldings.btc > 0 ? (
+              <>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                  Available: {formatBtc(btcHoldings.btc)} BTC (${btcValue.toFixed(2)})
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Amount in USD</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '28px', fontWeight: 300, color: 'var(--text-muted)' }}>$</span>
+                  <input
+                    type="number" inputMode="decimal" value={amount}
+                    onChange={e => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    style={{
+                      fontSize: '28px', fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif",
+                      background: 'transparent', border: 'none', color: 'var(--text-primary)',
+                      outline: 'none', width: '100%',
+                    }}
+                  />
+                </div>
+                {amount && btcPrice && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      ≈ {formatBtc(parseFloat(amount) / btcPrice)} BTC
+                    </p>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      You receive ${(parseFloat(amount) * (1 - BTC_MARKUP)).toFixed(2)} after 0.15% fee
+                    </p>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                  {['25%', '50%', '75%', 'Max'].map((label, i) => {
+                    const pcts = [0.25, 0.5, 0.75, 1];
+                    const val = (btcValue * pcts[i]).toFixed(2);
+                    return (
+                      <button key={label} onClick={() => setAmount(val)} style={{
+                        flex: 1, padding: '8px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                        background: 'var(--bg-tertiary)', border: '1px solid var(--border)',
+                        color: 'var(--text-secondary)', cursor: 'pointer',
+                      }}>{label}</button>
+                    );
+                  })}
+                </div>
+                <button onClick={handleSell} disabled={!amount || parseFloat(amount) < 1 || parseFloat(amount) > btcValue} className="btn" style={{
+                  width: '100%', padding: '14px', fontSize: '15px', fontWeight: 700, borderRadius: '12px',
+                  background: amount && parseFloat(amount) >= 1 && parseFloat(amount) <= btcValue ? 'var(--red-primary)' : 'var(--bg-tertiary)',
+                  color: amount && parseFloat(amount) >= 1 && parseFloat(amount) <= btcValue ? '#fff' : 'var(--text-muted)',
+                  border: 'none', cursor: amount && parseFloat(amount) >= 1 ? 'pointer' : 'not-allowed',
+                }}>
+                  Sell Bitcoin
+                </button>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                <p style={{ fontSize: '36px', marginBottom: '12px' }}>₿</p>
+                <p style={{ fontWeight: 600, marginBottom: '4px' }}>No Bitcoin Yet</p>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Buy some BTC to start trading</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Activity Tab */}
+      {tab === 'history' && (
+        <div style={{ padding: '0 16px 24px' }}>
+          {btcTransactions.length === 0 ? (
+            <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
+              <p style={{ fontSize: '36px', marginBottom: '12px' }}>📋</p>
+              <p style={{ fontWeight: 600, marginBottom: '4px' }}>No Transactions Yet</p>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Your Bitcoin buy and sell history will appear here</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {btcTransactions.map((tx, i) => (
+                <div key={i} className="card" style={{ padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                      width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: tx.type === 'buy' ? 'rgba(0, 220, 130, 0.1)' : 'rgba(255, 104, 56, 0.1)',
+                      fontSize: '16px',
+                    }}>
+                      {tx.type === 'buy' ? '↓' : '↑'}
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 600, fontSize: '14px', textTransform: 'capitalize' }}>{tx.type} BTC</p>
+                      <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                        {new Date(tx.timestamp).toLocaleDateString()} • @${tx.price?.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ fontWeight: 600, fontSize: '14px', color: tx.type === 'buy' ? 'var(--green-primary)' : 'var(--red-primary)' }}>
+                      {tx.type === 'buy' ? '+' : '-'}{formatBtc(tx.btc)} BTC
+                    </p>
+                    <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>${tx.usd.toFixed(2)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirming && (
+        <div className="modal-overlay" onClick={() => setConfirming(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '380px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '16px', fontFamily: "'Space Grotesk', sans-serif" }}>
+              Confirm {confirming.type === 'buy' ? 'Purchase' : 'Sale'}
+            </h3>
+            <div className="card" style={{ padding: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Amount</span>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>${(confirming.type === 'sell' ? (confirming.grossUsd || confirming.usd) : confirming.usd).toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Fee (0.15%)</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-muted)' }}>-${(confirming.fee || 0).toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Bitcoin</span>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>{formatBtc(confirming.btc)} BTC</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Price</span>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>${btcPrice?.toLocaleString('en-US', { maximumFractionDigits: 2 })}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setConfirming(null)} className="btn btn-secondary" style={{ flex: 1, padding: '12px' }}>Cancel</button>
+              <button onClick={confirmAction} className="btn" style={{
+                flex: 1, padding: '12px',
+                background: confirming.type === 'buy' ? 'linear-gradient(135deg, #F7931A, #E8850F)' : 'var(--red-primary)',
+                color: '#fff', border: 'none', fontWeight: 700,
+              }}>
+                {confirming.type === 'buy' ? 'Buy' : 'Sell'} BTC
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast */}
+      {showSuccess && (
+        <div style={{
+          position: 'fixed', bottom: '100px', left: '50%', transform: 'translateX(-50%)',
+          background: showSuccess.type === 'buy' ? 'var(--green-primary)' : 'var(--red-primary)',
+          color: showSuccess.type === 'buy' ? '#000' : '#fff',
+          padding: '12px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '14px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)', zIndex: 9999,
+          animation: 'slideUp 0.3s ease-out',
+        }}>
+          {showSuccess.type === 'buy' ? '✓' : '↑'} {showSuccess.type === 'buy' ? 'Bought' : 'Sold'} {formatBtc(showSuccess.btc)} BTC for ${showSuccess.usd.toFixed(2)}
+        </div>
+      )}
+
+      {/* Spin Reward Toast */}
+      {spinRewardToast && (
+        <div style={{
+          position: 'fixed', bottom: '140px', left: '50%', transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, var(--green-primary), #00B870)',
+          color: '#000', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, fontSize: '14px',
+          boxShadow: '0 4px 20px rgba(0,220,130,0.4)', zIndex: 10000,
+          animation: 'slideUp 0.3s ease-out', display: 'flex', alignItems: 'center', gap: '8px',
+        }}>
+          🎰 +{spinRewardToast} free spins earned!
+        </div>
+      )}
+
+      {/* Volume Progress Card */}
+      <div className="card" style={{ margin: '0 16px 12px', padding: '14px 16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '16px' }}>🎰</span>
+            <span style={{ fontSize: '13px', fontWeight: 600 }}>Trade to Earn Spins</span>
+          </div>
+          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>5 spins / $1K</span>
+        </div>
+        <div style={{ background: 'var(--bg-tertiary)', borderRadius: '6px', height: '8px', overflow: 'hidden', marginBottom: '6px' }}>
+          <div style={{
+            height: '100%', borderRadius: '6px',
+            background: 'linear-gradient(90deg, #F7931A, #FFB347)',
+            width: `${Math.min(100, ((btcVolume.total % 1000) / 1000) * 100)}%`,
+            transition: 'width 0.5s ease',
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
+          <span>${(btcVolume.total % 1000).toFixed(0)} / $1,000</span>
+          <span>{Math.floor(btcVolume.total / 1000) * BTC_SPINS_PER_1K} spins earned total</span>
+        </div>
+      </div>
+
+      {/* Info Card */}
+      <div className="card" style={{ margin: '0 16px 24px', padding: '16px', background: 'rgba(247, 147, 26, 0.04)', border: '1px solid rgba(247, 147, 26, 0.12)' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '18px' }}>⚡</span>
+          <div>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: '#F7931A', marginBottom: '4px' }}>Powered by Lightspark</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              Buy, sell, and hold Bitcoin with instant settlement via the Lightspark Grid API. 0.15% fee on all trades. Earn 5 free slot spins for every $1,000 in BTC you trade.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==================== COMING SOON SCREENS ====================
+const ComingSoonScreen = ({ title, description, icon, features, onNavigate }) => (
+  <div className="page-content">
+    <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+      <div style={{
+        width: '80px', height: '80px', borderRadius: '24px', margin: '0 auto 20px',
+        background: 'linear-gradient(135deg, rgba(0, 220, 130, 0.1), rgba(0, 220, 130, 0.03))',
+        border: '1px solid rgba(0, 220, 130, 0.15)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px',
+      }}>
+        {icon}
+      </div>
+      <h2 style={{ fontSize: '24px', fontWeight: 800, marginBottom: '8px', fontFamily: "'Space Grotesk', sans-serif" }}>
+        {title}
+      </h2>
+      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '32px', maxWidth: '360px', margin: '0 auto 32px', lineHeight: 1.6 }}>
+        {description}
+      </p>
+
+      <div className="card" style={{ padding: '20px', textAlign: 'left', marginBottom: '24px' }}>
+        <h3 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '12px', letterSpacing: '0.5px' }}>WHAT TO EXPECT</h3>
+        {features.map((f, i) => (
+          <div key={i} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
+            <span style={{ color: 'var(--green-primary)', fontWeight: 700, fontSize: '14px', flexShrink: 0 }}>✓</span>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{f}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="card" style={{ padding: '16px', background: 'rgba(0, 220, 130, 0.04)', border: '1px solid rgba(0, 220, 130, 0.1)' }}>
+        <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--green-primary)', marginBottom: '4px' }}>Coming Soon</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+          We're building this right now. You'll be among the first to try it.
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const CardScreen = ({ onNavigate }) => (
+  <ComingSoonScreen
+    title="Borda Card"
+    description="Swipe your way to more spins. Every $1,000 in card spend earns you 1 additional spin."
+    icon="💳"
+    features={[
+      'Virtual and physical Visa debit card',
+      'Earn spins with every swipe — $1,000 spend = 1 spin',
+      'Instant notifications and spending insights',
+      'No monthly fees, no minimums',
+      'Freeze/unfreeze your card instantly',
+    ]}
+    onNavigate={onNavigate}
+  />
+);
+
+const RoboAdvisorScreen = ({ onNavigate }) => (
+  <ComingSoonScreen
+    title="AI Roboadvisor"
+    description="Let AI manage your winning stocks. Automatically rebalance, diversify, and grow your portfolio."
+    icon="🤖"
+    features={[
+      'AI-powered portfolio management',
+      'Automatic rebalancing based on your risk profile',
+      'Tax-loss harvesting on winning stock positions',
+      'Personalized investment strategies',
+      'Real-time performance tracking and insights',
+    ]}
+    onNavigate={onNavigate}
+  />
+);
+
+const RemittancesScreen = ({ onNavigate }) => (
+  <ComingSoonScreen
+    title="Remittances"
+    description="Send money globally with Lightspark's real-time payment network. Low fees, instant delivery."
+    icon="🌍"
+    features={[
+      'Send money to 100+ countries instantly',
+      'Powered by Lightspark Grid API for real-time settlement',
+      'Up to 80% lower fees than traditional remittance services',
+      'Real-time exchange rates with no hidden markups',
+      'Track every transfer with full transparency',
+    ]}
+    onNavigate={onNavigate}
+  />
+);
+
+// ==================== OFFICIAL RULES MODAL ====================
+const OfficialRulesModal = ({ show, onClose }) => {
+  if (!show) return null;
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxHeight: '80vh', overflowY: 'auto', maxWidth: '540px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, marginBottom: '16px', fontFamily: "'Space Grotesk', sans-serif" }}>
+          Official Sweepstakes Rules
+        </h2>
+
+        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
+          <p style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
+            NO PURCHASE OR PAYMENT IS NECESSARY TO ENTER OR WIN. A PURCHASE OR PAYMENT OF ANY KIND WILL NOT INCREASE YOUR CHANCES OF WINNING.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>1. Eligibility:</strong> The Borda Savings Sweepstakes ("Sweepstakes") is open to legal residents of the United States, excluding residents of CT, HI, ID, IN, ME, MI, MT, NJ, NY, NV, TN, and WA, who are 18 years of age or older at the time of entry.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>2. How to Enter — Savings Method:</strong> Maintain funds on deposit with Borda. For every $1,000 held on an average daily basis, you will receive one (1) spin entry per day. Fractional entries accumulate (e.g., $500 held = 0.5 spins/day).
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>3. How to Enter — Card Spend Method:</strong> Use the Borda debit card (when available). For every $1,000 in qualifying card spend, you will receive one (1) additional spin entry.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>4. Alternate Method of Entry (AMOE):</strong> To receive one (1) free spin entry without a purchase or deposit, hand-print your name, address, email address, and phone number on a 3" × 5" card and mail it to: Borda Sweepstakes, PO Box [ADDRESS]. Limit one (1) free entry per stamped envelope per day. Sincerity of handwriting is required.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>5. Prizes:</strong> Winners receive fractional shares of publicly traded stocks. Prize value varies by stock rarity tier. Winners may choose to: (a) hold shares in their Borda portfolio, (b) cash out the dollar value minus a 3% placement fee, or (c) convert the value to additional spin entries.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>6. Odds of Winning:</strong> Odds of winning depend on the number of entries and are determined by a random number generator. Lower-priced stocks appear more frequently; higher-priced stocks are rarer. The multiplier (1×, 2×, 3×, 5×) affects prize value, not odds.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>7. Securities Disclosure:</strong> Brokerage services provided through Alpaca Securities LLC, member FINRA/SIPC. Stock prizes are executed as fractional share purchases. Past performance does not guarantee future results. All investments involve risk, including the loss of principal.
+          </p>
+
+          <p style={{ marginBottom: '12px' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>8. Sponsor:</strong> Borda, Inc. This promotion is not sponsored, endorsed, or administered by any stock exchange, brokerage, or financial regulatory body.
+          </p>
+        </div>
+
+        <button onClick={onClose} className="btn btn-primary" style={{ width: '100%', padding: '14px', marginTop: '16px', fontSize: '15px' }}>
+          I Understand
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ==================== THEME TOGGLE ====================
+const ThemeToggle = ({ theme, onToggle }) => (
+  <button
+    onClick={onToggle}
+    title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    style={{
+      width: 40, height: 40, borderRadius: '50%', border: '1px solid var(--border)',
+      background: 'var(--bg-secondary)', cursor: 'pointer', display: 'flex',
+      alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+      transition: 'all 0.3s', color: 'var(--text-primary)',
+    }}
+    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--green-primary)'; e.currentTarget.style.boxShadow = 'var(--glow-green)'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.boxShadow = 'none'; }}
+  >
+    {theme === 'dark' ? '☀️' : '🌙'}
+  </button>
+);
+
+// ==================== ERROR BOUNDARY ====================
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false }; }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err) { console.error('Borda ErrorBoundary caught:', err); }
+  render() {
+    if (this.state.hasError) {
+      return React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '32px', textAlign: 'center' } },
+        React.createElement('p', { style: { fontSize: '48px', marginBottom: '16px' } }, '⚠️'),
+        React.createElement('p', { style: { fontSize: '18px', fontWeight: 600, marginBottom: '8px' } }, 'Something went wrong'),
+        React.createElement('p', { style: { fontSize: '14px', color: '#888', marginBottom: '24px' } }, 'The app encountered an error. Tap below to reload.'),
+        React.createElement('button', { onClick: () => this.setState({ hasError: false }), style: { padding: '12px 32px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #00DC82, #00B86B)', color: '#000', fontWeight: 700, fontSize: '14px', cursor: 'pointer' } }, 'Try Again')
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ==================== LOCAL STORAGE HELPERS ====================
+const STORAGE_PREFIX = 'borda_';
+const loadState = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + key);
+    if (raw === null) return fallback;
+    return JSON.parse(raw);
+  } catch { return fallback; }
+};
+const saveState = (key, value) => {
+  try { localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value)); } catch {}
+};
+
+// ==================== MAIN APP ====================
+export default function Borda() {
+  const [currentPage, setCurrentPage] = useState(() => {
+    const savedUser = loadState('user', null);
+    return savedUser ? 'dashboard' : 'landing';
+  });
+  const [portfolio, setPortfolio] = useState(() => loadState('portfolio', {}));
+  const [spins, setSpins] = useState(() => loadState('spins', 3));
+  const [recentActivity, setRecentActivity] = useState(() => loadState('recentActivity', []));
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [user, setUser] = useState(() => loadState('user', null));
+  const [theme, setTheme] = useState(() => loadState('theme', 'dark'));
+  const [cashBalance, setCashBalance] = useState(() => loadState('cashBalance', 0));
+  const [savingsBalance, setSavingsBalance] = useState(() => loadState('savingsBalance', 0));
+  const [showRules, setShowRules] = useState(false);
+  const [tickerData, setTickerData] = useState(DEFAULT_TICKER_TAPE);
+  const [pricesLive, setPricesLive] = useState(false);
+  const toggleTheme = useCallback(() => setTheme(t => t === 'dark' ? 'light' : 'dark'), []);
+
+  // Computed portfolio value for spin calculations
+  const portfolioValue = useMemo(() => Object.values(portfolio).reduce((sum, pos) => sum + (pos.currentValue || 0), 0), [portfolio]);
+
+  // Monthly bonus tracker: Tier 10 ($10K+ savings) gets 1x monthly bonus on total spins earned
+  const [monthlyTracker, setMonthlyTracker] = useState(() => {
+    const saved = loadState('monthlyTracker', null);
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    if (saved && saved.month === currentMonth) return saved;
+    // New month or first time — return fresh tracker (bonus from last month handled in useEffect)
+    return { month: currentMonth, spinsEarned: 0, bonusAwarded: false, lastMonthSpins: saved ? saved.spinsEarned : 0, lastMonthSavings: saved ? (saved.avgSavings || 0) : 0 };
+  });
+
+  // Persist state to localStorage on changes
+  useEffect(() => { saveState('portfolio', portfolio); }, [portfolio]);
+  useEffect(() => { saveState('spins', spins); }, [spins]);
+  useEffect(() => { saveState('recentActivity', recentActivity.slice(0, 50)); }, [recentActivity]);
+  useEffect(() => { saveState('user', user); }, [user]);
+  useEffect(() => { saveState('theme', theme); }, [theme]);
+  useEffect(() => { saveState('cashBalance', cashBalance); }, [cashBalance]);
+  useEffect(() => { saveState('savingsBalance', savingsBalance); }, [savingsBalance]);
+  useEffect(() => { saveState('monthlyTracker', monthlyTracker); }, [monthlyTracker]);
+
+  // Monthly bonus: on new month, award 1x bonus if last month's savings was $10K+ (Tier 10)
+  const [monthlyBonusToast, setMonthlyBonusToast] = useState(null);
+  useEffect(() => {
+    if (!monthlyTracker.bonusAwarded && monthlyTracker.lastMonthSpins > 0 && monthlyTracker.lastMonthSavings >= 10000) {
+      const bonus = monthlyTracker.lastMonthSpins;
+      setSpins(prev => prev + bonus);
+      setMonthlyBonusToast(bonus);
+      SoundEngine.jackpot();
+      setMonthlyTracker(prev => ({ ...prev, bonusAwarded: true }));
+      AuditLog.log({ type: 'monthly_tier_bonus', bonus, lastMonthSpins: monthlyTracker.lastMonthSpins, savings: monthlyTracker.lastMonthSavings });
+      setTimeout(() => setMonthlyBonusToast(null), 6000);
+    }
+  }, [monthlyTracker.bonusAwarded, monthlyTracker.lastMonthSpins, monthlyTracker.lastMonthSavings]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Live market data — fetch on mount, then every PRICE_REFRESH_MS
+  useEffect(() => {
+    let cancelled = false;
+    const loadPrices = async () => {
+      try {
+        const { updatedStocks, tickerTape, live } = await fetchAllPrices();
+        if (cancelled) return;
+        STOCKS = updatedStocks; // update module-level reference
+        setTickerData(tickerTape);
+        setPricesLive(live);
+      } catch (e) {
+        console.warn('Live price fetch failed, using fallback prices', e);
+      }
+    };
+    loadPrices();
+    const interval = setInterval(loadPrices, PRICE_REFRESH_MS);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+
+  const handleNavigate = useCallback((page) => { SoundEngine.nav(); setCurrentPage(page); }, []);
+
+  const handleAddWin = useCallback((ticker, shares, value) => {
+    setPortfolio(prev => {
+      const existing = prev[ticker] || { shares: 0, totalCost: 0, currentValue: 0 };
+      return {
+        ...prev,
+        [ticker]: {
+          shares: existing.shares + shares,
+          totalCost: existing.totalCost + value,
+          currentValue: existing.currentValue + value,
+        }
+      };
+    });
+    setRecentActivity(prev => [{ ticker, shares, value, timestamp: new Date(), type: 'win' }, ...prev]);
+  }, []);
+
+  // Helper: add spins and track for monthly bonus
+  const addSpins = useCallback((amount) => {
+    if (amount <= 0) return;
+    setSpins(prev => prev + amount);
+    setMonthlyTracker(prev => ({ ...prev, spinsEarned: prev.spinsEarned + amount, avgSavings: savingsBalance }));
+  }, [savingsBalance]);
+
+  const handleUpdateSpins = useCallback((delta) => {
+    if (delta > 0) {
+      addSpins(delta);
+    } else {
+      setSpins(prev => Math.max(0, prev + delta));
+    }
+  }, [addSpins]);
+
+  // Sell fractional shares from portfolio → convert to spins
+  // Exchange rate: $1 of stock value = 1 spin
+  const handleSellShares = useCallback((ticker, sharesToSell) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    if (!stock) return;
+    setPortfolio(prev => {
+      const holding = prev[ticker];
+      if (!holding || holding.shares < sharesToSell) return prev;
+      const saleValue = sharesToSell * stock.price;
+      const newSpins = Math.floor(saleValue); // $1 = 1 spin
+      const remainingShares = holding.shares - sharesToSell;
+      const avgCostPerShare = holding.totalCost / holding.shares;
+
+      // Add spins from the sale (tracked for monthly bonus)
+      addSpins(newSpins);
+
+      // Track as activity
+      setRecentActivity(prev => [{
+        ticker, shares: -sharesToSell, value: saleValue, timestamp: new Date(), type: 'sell',
+      }, ...prev]);
+
+      // Audit log
+      AuditLog.log({ type: 'sell', ticker, shares: sharesToSell, value: saleValue, spinsGained: newSpins, priceAtTime: stock.price });
+
+      if (remainingShares <= 0.0001) {
+        // Remove holding entirely if essentially zero
+        const { [ticker]: _, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [ticker]: {
+          shares: remainingShares,
+          totalCost: avgCostPerShare * remainingShares,
+          currentValue: remainingShares * stock.price,
+        }
+      };
+    });
+  }, []);
+
+  // Cash out shares → add dollar value to cash balance (not spins)
+  const handleCashOutToBalance = useCallback((ticker, sharesToCashOut) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    if (!stock) return;
+    setPortfolio(prev => {
+      const holding = prev[ticker];
+      if (!holding || holding.shares < sharesToCashOut) return prev;
+      const grossValue = sharesToCashOut * stock.price;
+      const fee = grossValue * PLACEMENT_FEE;
+      const cashValue = grossValue - fee; // 3% placement fee deducted
+      const remainingShares = holding.shares - sharesToCashOut;
+      const avgCostPerShare = holding.totalCost / holding.shares;
+
+      // Add cash to balance (after fee)
+      setCashBalance(b => b + cashValue);
+
+      // Track as activity
+      setRecentActivity(prev => [{
+        ticker, shares: -sharesToCashOut, value: cashValue, fee, timestamp: new Date(), type: 'cash_out',
+      }, ...prev]);
+
+      // Audit log
+      AuditLog.log({ type: 'cash_out', ticker, shares: sharesToCashOut, value: cashValue, fee, grossValue, priceAtTime: stock.price });
+
+      if (remainingShares <= 0.0001) {
+        const { [ticker]: _, ...rest } = prev;
+        return rest;
+      }
+      return {
+        ...prev,
+        [ticker]: {
+          shares: remainingShares,
+          totalCost: avgCostPerShare * remainingShares,
+          currentValue: remainingShares * stock.price,
+        }
+      };
+    });
+  }, []);
+
+  // Buy shares of a stock using cash balance
+  // Purchases count at 5x value towards spins: $1K in purchases = 5 bonus spins
+  const handleBuyStock = useCallback((ticker, dollarAmount) => {
+    const stock = STOCKS.find(s => s.ticker === ticker);
+    if (!stock || dollarAmount <= 0 || cashBalance < dollarAmount) return;
+
+    const sharesBought = dollarAmount / stock.price;
+
+    // Deduct cash
+    setCashBalance(prev => prev - dollarAmount);
+
+    // Add shares to portfolio
+    setPortfolio(p => {
+      const existing = p[ticker] || { shares: 0, totalCost: 0, currentValue: 0 };
+      return {
+        ...p,
+        [ticker]: {
+          shares: existing.shares + sharesBought,
+          totalCost: existing.totalCost + dollarAmount,
+          currentValue: existing.currentValue + dollarAmount,
+        }
+      };
+    });
+
+    // Award bonus spins for stock purchases: 5 spins per $1K bought (5x multiplier)
+    const purchaseBonusSpins = Math.floor((dollarAmount * STOCK_BUY_SPIN_RATE) / 1000);
+    if (purchaseBonusSpins > 0) {
+      addSpins(purchaseBonusSpins);
+      SoundEngine.coin();
+      AuditLog.log({ type: 'stock_purchase_bonus', spins: purchaseBonusSpins, purchaseAmount: dollarAmount, ticker });
+    }
+
+    // Track as activity
+    setRecentActivity(prev => [{
+      ticker, shares: sharesBought, value: dollarAmount, timestamp: new Date(), type: 'buy',
+      bonusSpins: purchaseBonusSpins > 0 ? purchaseBonusSpins : undefined,
+    }, ...prev]);
+
+    // Audit log
+    AuditLog.log({ type: 'purchase', ticker, shares: sharesBought, value: dollarAmount, priceAtTime: stock.price });
+  }, [cashBalance, addSpins]);
+
+  // Convert a win to spins (instead of keeping shares) — tracks in activity history
+  const handleConvertWinToSpins = useCallback((ticker, shares, value, spinsGained) => {
+    addSpins(spinsGained);
+    setRecentActivity(prev => [{
+      ticker, shares, value, timestamp: new Date(), type: 'spin_conversion',
+    }, ...prev]);
+  }, []);
+
+  // Cash out a win directly to cash balance (minus 3% placement fee)
+  const handleCashOutWin = useCallback((ticker, shares, cashValue, feeAmount) => {
+    setCashBalance(b => b + cashValue);
+    setRecentActivity(prev => [{
+      ticker, shares, value: cashValue, timestamp: new Date(), type: 'cash_out',
+    }, ...prev]);
+    AuditLog.log({ type: 'win_cashed_out', ticker, shares, cashValue, fee: feeAmount, feeRate: PLACEMENT_FEE });
+  }, []);
+
+  // Deposit funds into savings
+  const handleDeposit = useCallback((amount, method) => {
+    SoundEngine.coin();
+    setSavingsBalance(b => b + amount);
+    // Instant deposit bonus: 1 spin per $500 deposited
+    const bonusSpins = Math.floor(amount / 500);
+    if (bonusSpins > 0) {
+      addSpins(bonusSpins);
+      AuditLog.log({ type: 'deposit_bonus', spins: bonusSpins, deposit: amount });
+    }
+    setRecentActivity(prev => [{
+      ticker: 'DEPOSIT', shares: 0, value: amount, timestamp: new Date(), type: 'deposit',
+      bonusSpins: bonusSpins > 0 ? bonusSpins : undefined,
+    }, ...prev]);
+    AuditLog.log({ type: 'deposit', amount, method });
+  }, []);
+
+  // Withdraw funds from savings/cash
+  const handleWithdraw = useCallback((amount, method) => {
+    // Withdraw from cash first, then savings
+    setCashBalance(prev => {
+      const fromCash = Math.min(prev, amount);
+      const fromSavings = amount - fromCash;
+      if (fromSavings > 0) {
+        setSavingsBalance(sb => Math.max(0, sb - fromSavings));
+      }
+      return prev - fromCash;
+    });
+    setRecentActivity(prev => [{
+      ticker: 'WITHDRAW', shares: 0, value: -amount, timestamp: new Date(), type: 'withdraw',
+    }, ...prev]);
+    AuditLog.log({ type: 'withdraw', amount, method });
+  }, []);
+
+  const handleOnboardingComplete = useCallback(() => {
+    setUser({ name: 'John Doe', email: 'john@example.com' });
+    // New users get 1–3 welcome spins
+    const welcomeSpins = Math.floor(Math.random() * 3) + 1;
+    setSpins(welcomeSpins);
+  }, []);
+
+  const showNav = currentPage !== 'landing' && currentPage !== 'onboarding' && user;
+  const navItems = [
+    { label: 'Home', icon: '📊', page: 'dashboard' },
+    { label: 'Play', icon: '🎰', page: 'game' },
+    { label: 'Bitcoin', icon: '₿', page: 'bitcoin' },
+    { label: 'Wallet', icon: '🏦', page: 'wallet' },
+    { label: 'More', icon: '⋯', page: 'account' },
+  ];
+
+  return (
+    <>
+      <StyleInjector theme={theme} />
+      <div className="app-container">
+        {showNav && !isMobile && (
+          <div className="desktop-sidebar">
+            {navItems.map((item) => (
+              <button key={item.page} className={`btn btn-icon ${currentPage === item.page ? 'active' : ''}`} onClick={() => handleNavigate(item.page)} title={item.label} style={{ fontSize: '20px' }}>
+                {item.icon}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="main-content">
+          {showNav && (
+            <div className="header-bar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.5px', fontFamily: "'Space Grotesk', sans-serif", background: 'var(--green-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Borda</span>
+                {pricesLive && <span style={{ fontSize: '8px', fontWeight: 700, color: '#00DC82', background: 'rgba(0,220,130,0.08)', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.8px', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#00DC82', display: 'inline-block', animation: 'pulseGlow 2s ease infinite' }} />LIVE</span>}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {/* Spins badge — always visible */}
+                <button onClick={() => handleNavigate('game')} style={{
+                  display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(255, 153, 0, 0.06)',
+                  padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255, 153, 0, 0.12)',
+                  cursor: 'pointer', color: 'var(--text-primary)', transition: 'all 0.2s',
+                  minHeight: '36px', minWidth: '44px',
+                }}>
+                  <span style={{ fontSize: '14px' }}>🎰</span>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#FF9900', fontFamily: "'Space Grotesk', sans-serif" }}>{spins}</span>
+                </button>
+                {/* Savings balance — desktop only */}
+                {!isMobile && savingsBalance > 0 && (
+                  <button onClick={() => handleNavigate('wallet')} style={{
+                    display: 'flex', alignItems: 'center', gap: '5px', background: 'rgba(0,220,130,0.06)',
+                    padding: '5px 10px', borderRadius: '8px', border: '1px solid rgba(0,220,130,0.1)',
+                    cursor: 'pointer', color: 'var(--text-primary)', transition: 'all 0.2s',
+                  }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>$</span>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--green-primary)', fontFamily: "'Space Grotesk', sans-serif" }}>{savingsBalance.toLocaleString()}</span>
+                  </button>
+                )}
+                <button onClick={() => { SoundEngine.toggle(); setTheme(t => t); /* force re-render */ }} title={`Sound ${SoundEngine.enabled ? 'on' : 'off'}`} className="btn btn-icon" style={{ width: '36px', height: '36px', fontSize: '14px', borderRadius: '10px', position: 'relative' }}>
+                  {SoundEngine.enabled ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                  )}
+                </button>
+                <ThemeToggle theme={theme} onToggle={toggleTheme} />
+              </div>
+            </div>
+          )}
+
+          <ErrorBoundary>
+          {currentPage === 'landing' && <LandingPage onNavigate={handleNavigate} theme={theme} toggleTheme={toggleTheme} tickerData={tickerData} />}
+          {currentPage === 'onboarding' && <OnboardingFlow onNavigate={handleNavigate} onComplete={handleOnboardingComplete} />}
+          {currentPage === 'dashboard' && user && <Dashboard portfolio={portfolio} spins={spins} cashBalance={cashBalance} savingsBalance={savingsBalance} recentActivity={recentActivity} onNavigate={handleNavigate} />}
+          {currentPage === 'game' && user && <SlotMachineGame portfolio={portfolio} spins={spins} onAddWin={handleAddWin} onUpdateSpins={handleUpdateSpins} onConvertToSpins={handleConvertWinToSpins} onCashOutWin={handleCashOutWin} />}
+          {currentPage === 'wallet' && user && <WalletScreen cashBalance={cashBalance} savingsBalance={savingsBalance} spins={spins} portfolioValue={portfolioValue} onNavigate={handleNavigate} onDeposit={handleDeposit} onWithdraw={handleWithdraw} />}
+          {currentPage === 'portfolio' && user && <PortfolioScreen portfolio={portfolio} cashBalance={cashBalance} onSellShares={handleSellShares} onCashOut={handleCashOutToBalance} onBuyStock={handleBuyStock} onNavigate={handleNavigate} />}
+          {currentPage === 'card' && user && <CardScreen onNavigate={handleNavigate} />}
+          {currentPage === 'roboadvisor' && user && <RoboAdvisorScreen onNavigate={handleNavigate} />}
+          {currentPage === 'remittances' && user && <RemittancesScreen onNavigate={handleNavigate} />}
+          {currentPage === 'referral' && user && <ReferralScreen onNavigate={handleNavigate} spins={spins} />}
+          {currentPage === 'bitcoin' && user && <BitcoinScreen onNavigate={handleNavigate} savingsBalance={savingsBalance} cashBalance={cashBalance} onUpdateSpins={handleUpdateSpins} />}
+          {currentPage === 'account' && user && <AccountScreen onNavigate={handleNavigate} onUpdateSpins={handleUpdateSpins} onShowRules={() => setShowRules(true)} />}
+          </ErrorBoundary>
+
+          {showNav && currentPage !== 'landing' && currentPage !== 'onboarding' && (
+            <div style={{ padding: '10px 24px', textAlign: 'center', fontSize: '10px', color: 'var(--text-muted)', lineHeight: '1.6', flexShrink: 0, borderTop: '1px solid var(--border)', background: 'var(--bg-primary)', letterSpacing: '0.2px' }}>
+              NO PURCHASE NECESSARY. <span onClick={() => setShowRules(true)} style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--text-secondary)' }}>Official Rules</span>. Void where prohibited. Brokerage by Alpaca Securities LLC, FINRA/SIPC.
+            </div>
+          )}
+
+          <OfficialRulesModal show={showRules} onClose={() => setShowRules(false)} />
+          <LiveActivityFeed />
+
+          {/* Monthly tier bonus toast */}
+          {monthlyBonusToast && (
+            <div style={{
+              position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999,
+              background: 'linear-gradient(135deg, #FF9900, #FF6600)', color: '#000', padding: '16px 28px',
+              borderRadius: '16px', boxShadow: '0 8px 32px rgba(255,153,0,0.4)', animation: 'bounceIn 0.5s ease',
+              textAlign: 'center', maxWidth: '340px',
+            }}>
+              <p style={{ fontSize: '22px', fontWeight: 800, marginBottom: '4px' }}>🏆 Monthly Bonus!</p>
+              <p style={{ fontSize: '14px', fontWeight: 600 }}>+{monthlyBonusToast} bonus spins from Tier 10</p>
+              <p style={{ fontSize: '11px', opacity: 0.8, marginTop: '4px' }}>Your $10K+ savings earned a 1× monthly multiplier</p>
+            </div>
+          )}
+        </div>
+
+        {showNav && isMobile && (
+          <div className="mobile-nav" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+            {navItems.map((item) => {
+              const isActive = currentPage === item.page;
+              return (
+                <button key={item.page} onClick={() => handleNavigate(item.page)} style={{
+                  flex: 1, background: 'transparent', border: 'none',
+                  color: isActive ? 'var(--green-primary)' : 'var(--text-muted)',
+                  fontSize: '20px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+                  padding: '8px 0', transition: 'color 0.2s', position: 'relative',
+                  WebkitTapHighlightColor: 'transparent',
+                }}>
+                  <span style={{ transition: 'transform 0.2s', transform: isActive ? 'scale(1.15)' : 'scale(1)' }}>{item.icon}</span>
+                  <span style={{ fontSize: '10px', fontWeight: isActive ? 700 : 500, letterSpacing: '0.3px' }}>{item.label}</span>
+                  <span style={{
+                    position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)',
+                    width: isActive ? '20px' : '0px', height: '2px', borderRadius: '1px', background: 'var(--green-primary)',
+                    transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s',
+                    opacity: isActive ? 1 : 0,
+                  }} />
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

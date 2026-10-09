@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/[...path].js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/[...path].js" },
+    { "src": "/demo-user/(.*)", "dest": "/public/demo-user/$1" },
+    { "src": "/demo-user", "dest": "/public/demo-user/index.html" },
+    { "src": "/chances.html", "dest": "/public/chances.html" },
+    { "src": "/(.*)", "dest": "/public/$1" }
+  ]
+}

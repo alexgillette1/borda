@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Join the Borda waitlist — save money, spin the reels, win real stocks. Refer friends to move up and earn bonus spins.">
+  <meta name="theme-color" content="#0B0E11">
+  <meta property="og:title" content="Borda — Your savings win you stocks">
+  <meta property="og:description" content="Save money, earn spins, win real stocks. Join the waitlist and skip the line with referrals.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://borda.ai">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Borda — Your Savings Win You Stocks</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0B0E11;
+      --bg-secondary: #141821;
+      --bg-tertiary: #1C2230;
+      --text-primary: #EAECEF;
+      --text-secondary: #848E9C;
+      --text-muted: #5E6673;
+      --green-primary: #00DC82;
+      --green-glow: rgba(0, 220, 130, 0.08);
+      --border: rgba(255,255,255,0.06);
+      --gold: #FFB800;
+    }
+    html, body { background: var(--bg-primary); color: var(--text-primary); font-family: 'DM Sans', -apple-system, sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 20px rgba(0,220,130,0.2); } 50% { box-shadow: 0 0 40px rgba(0,220,130,0.4); } }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes countUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+    @keyframes confetti { 0% { transform: translateY(0) rotate(0); opacity: 1; } 100% { transform: translateY(-200px) rotate(720deg); opacity: 0; } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    .container { max-width: 480px; margin: 0 auto; padding: 0 20px; }
+
+    /* HERO SECTION */
+    .hero { padding: 60px 0 40px; text-align: center; animation: fadeUp 0.8s ease; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; background: var(--green-glow); border: 1px solid rgba(0,220,130,0.15); font-size: 12px; font-weight: 600; color: var(--green-primary); letter-spacing: 0.5px; margin-bottom: 20px; }
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-primary); animation: pulseGlow 2s ease infinite; }
+    .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: 44px; font-weight: 800; line-height: 1.1; margin-bottom: 16px; background: linear-gradient(135deg, var(--text-primary) 0%, var(--green-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 17px; color: var(--text-secondary); line-height: 1.6; max-width: 360px; margin: 0 auto 32px; }
+
+    /* SIGNUP FORM */
+    .signup-form { display: flex; gap: 10px; margin-bottom: 16px; }
+    .signup-form input { flex: 1; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; font-size: 15px; outline: none; transition: all 0.2s; }
+    .signup-form input:focus { border-color: var(--green-primary); box-shadow: 0 0 20px rgba(0,220,130,0.15); }
+    .signup-form input::placeholder { color: var(--text-muted); }
+    .signup-form button { padding: 14px 28px; border-radius: 14px; border: none; background: var(--green-primary); color: #0B0E11; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .signup-form button:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,220,130,0.3); }
+    .signup-form button:active { transform: scale(0.97); }
+    .signup-form button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .signup-note { font-size: 12px; color: var(--text-muted); text-align: center; }
+
+    /* STATS BAR */
+    .stats-bar { display: flex; justify-content: center; gap: 32px; padding: 24px 0; margin: 24px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .stat { text-align: center; }
+    .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800; color: var(--text-primary); }
+    .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; margin-top: 4px; }
+
+    /* POST-SIGNUP (HIDDEN INITIALLY) */
+    .post-signup { display: none; }
+    .post-signup.active { display: block; animation: fadeUp 0.6s ease; }
+
+    /* POSITION CARD */
+    .position-card { background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%); border-radius: 20px; padding: 32px 24px; text-align: center; margin-bottom: 24px; border: 1px solid var(--border); }
+    .position-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 8px; }
+    .position-number { font-family: 'Space Grotesk', sans-serif; font-size: 64px; font-weight: 800; color: var(--green-primary); line-height: 1; margin-bottom: 8px; animation: countUp 0.6s ease; }
+    .position-total { font-size: 14px; color: var(--text-secondary); }
+    .position-bar { height: 6px; border-radius: 3px; background: var(--bg-primary); margin-top: 16px; overflow: hidden; }
+    .position-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--green-primary), #00FF96); transition: width 1s ease; }
+
+    /* REWARDS CARD */
+    .rewards-card { background: var(--bg-secondary); border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid var(--border); }
+    .rewards-title { font-size: 13px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 16px; }
+    .reward-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+    .reward-row + .reward-row { border-top: 1px solid var(--border); }
+    .reward-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .reward-text { flex: 1; }
+    .reward-text strong { display: block; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .reward-text span { font-size: 12px; color: var(--text-secondary); }
+    .reward-value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: var(--green-primary); }
+
+    /* REFERRAL SECTION */
+    .referral-section { margin-bottom: 24px; }
+    .referral-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 10px; }
+    .referral-link-box { display: flex; gap: 8px; margin-bottom: 16px; }
+    .referral-link { flex: 1; padding: 12px 16px; border-radius: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--green-primary); font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; }
+    .copy-btn { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--green-primary); background: transparent; color: var(--green-primary); font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .copy-btn:hover { background: var(--green-glow); }
+    .copy-btn.copied { background: var(--green-primary); color: var(--bg-primary); }
+
+    /* SHARE BUTTONS */
+    .share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .share-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .share-btn:hover { border-color: var(--text-muted); transform: translateY(-1px); }
+    .share-btn svg { width: 18px; height: 18px; }
+
+    /* REFERRAL TRACKER */
+    .referral-tracker { background: var(--bg-secondary); border-radius: 16px; padding: 20px; margin-bottom: 24px; border: 1px solid var(--border); }
+    .tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .tracker-title { font-size: 13px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.5px; }
+    .tracker-count { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 800; color: var(--text-primary); }
+    .tracker-milestones { display: flex; gap: 8px; }
+    .milestone { flex: 1; text-align: center; padding: 10px 4px; border-radius: 10px; background: var(--bg-tertiary); border: 1px solid var(--border); transition: all 0.3s; }
+    .milestone.achieved { border-color: var(--green-primary); background: var(--green-glow); }
+    .milestone-count { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 800; color: var(--text-muted); }
+    .milestone.achieved .milestone-count { color: var(--green-primary); }
+    .milestone-reward { font-size: 9px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .milestone.achieved .milestone-reward { color: var(--text-secondary); }
+
+    /* HOW IT WORKS */
+    .how-section { margin: 40px 0; }
+    .how-title { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 24px; }
+    .how-steps { display: flex; flex-direction: column; gap: 16px; }
+    .how-step { display: flex; align-items: flex-start; gap: 16px; padding: 16px; border-radius: 14px; background: var(--bg-secondary); border: 1px solid var(--border); }
+    .how-step-num { width: 32px; height: 32px; border-radius: 10px; background: var(--green-glow); border: 1px solid rgba(0,220,130,0.2); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; color: var(--green-primary); flex-shrink: 0; }
+    .how-step h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .how-step p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* FOOTER */
+    .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--border); margin-top: 40px; }
+    .footer-logo { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(135deg, var(--green-primary), #00FF96); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
+    .footer p { font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 320px; margin: 0 auto; }
+    .footer a { color: var(--text-secondary); text-decoration: none; }
+    .footer a:hover { color: var(--green-primary); }
+
+    /* CONFETTI */
+    .confetti-piece { position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 1000; }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 34px; }
+      .signup-form { flex-direction: column; }
+      .signup-form button { width: 100%; }
+      .stats-bar { gap: 20px; }
+      .stat-value { font-size: 18px; }
+      .share-grid { grid-template-columns: 1fr; }
+      .position-number { font-size: 48px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="waitlist-root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ==================== WAITLIST CONFIG ====================
+const TOTAL_WAITLIST = 52847; // Simulated total signups
+const REFERRAL_REWARDS = [
+  { count: 3, reward: '+5 bonus spins', icon: '🎰' },
+  { count: 5, reward: 'Skip 500 spots', icon: '⚡' },
+  { count: 10, reward: '+15 bonus spins', icon: '🎰' },
+  { count: 25, reward: 'Priority access', icon: '👑' },
+];
+
+// Generate a short referral code
+const generateCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'BORDA-';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+};
+
+// ==================== CONFETTI ====================
+const launchConfetti = () => {
+  const colors = ['#00DC82', '#00FF96', '#FFB800', '#FF6838', '#A855F7', '#4285F4'];
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '60vh';
+    piece.style.width = (Math.random() * 8 + 4) + 'px';
+    piece.style.height = (Math.random() * 8 + 4) + 'px';
+    piece.style.animation = `confetti ${Math.random() * 1.5 + 1}s ease forwards`;
+    piece.style.animationDelay = Math.random() * 0.3 + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 3000);
+  }
+};
+
+// ==================== MAIN COMPONENT ====================
+const WaitlistApp = () => {
+  const [email, setEmail] = useState('');
+  const [signedUp, setSignedUp] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('borda_waitlist_signed_up')) || false; } catch { return false; }
+  });
+  const [position, setPosition] = useState(() => {
+    try { return parseInt(localStorage.getItem('borda_waitlist_position')) || 0; } catch { return 0; }
+  });
+  const [referralCode, setReferralCode] = useState(() => {
+    try { return localStorage.getItem('borda_waitlist_code') || ''; } catch { return ''; }
+  });
+  const [referralCount, setReferralCount] = useState(() => {
+    try { return parseInt(localStorage.getItem('borda_waitlist_referrals')) || 0; } catch { return 0; }
+  });
+  const [bonusSpins, setBonusSpins] = useState(() => {
+    try { return parseInt(localStorage.getItem('borda_waitlist_spins')) || 0; } catch { return 0; }
+  });
+  const [copied, setCopied] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const inputRef = useRef(null);
+
+  // Check URL for referral param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) {
+      try { localStorage.setItem('borda_waitlist_referred_by', ref); } catch {}
+    }
+  }, []);
+
+  const handleSignup = useCallback(async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    setError('');
+    setSubmitting(true);
+
+    // Simulate API call
+    await new Promise(r => setTimeout(r, 1200));
+
+    const pos = Math.floor(Math.random() * 3000) + 800;
+    const code = generateCode();
+
+    setPosition(pos);
+    setReferralCode(code);
+    setSignedUp(true);
+    setBonusSpins(3); // Welcome bonus
+
+    try {
+      localStorage.setItem('borda_waitlist_signed_up', 'true');
+      localStorage.setItem('borda_waitlist_position', pos);
+      localStorage.setItem('borda_waitlist_code', code);
+      localStorage.setItem('borda_waitlist_email', email);
+      localStorage.setItem('borda_waitlist_spins', '3');
+    } catch {}
+
+    setSubmitting(false);
+    launchConfetti();
+    if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
+  }, [email]);
+
+  const referralLink = `https://borda.ai/waitlist?ref=${referralCode}`;
+  const positionPercent = position > 0 ? Math.max(5, Math.min(95, (1 - position / TOTAL_WAITLIST) * 100)) : 0;
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard?.writeText(referralLink);
+    setCopied(true);
+    if (navigator.vibrate) navigator.vibrate(30);
+    setTimeout(() => setCopied(false), 2000);
+  }, [referralLink]);
+
+  const shareText = `I'm #${position.toLocaleString()} on the Borda waitlist! Save money, earn spins, win real stocks. Join and skip the line:`;
+
+  const handleNativeShare = useCallback(() => {
+    if (navigator.share) {
+      navigator.share({ title: 'Join Borda', text: shareText, url: referralLink }).catch(() => {});
+    } else {
+      handleCopy();
+    }
+  }, [shareText, referralLink, handleCopy]);
+
+  // Simulate referral coming in (for demo)
+  const simulateReferral = useCallback(() => {
+    const newCount = referralCount + 1;
+    setReferralCount(newCount);
+    try { localStorage.setItem('borda_waitlist_referrals', newCount); } catch {}
+
+    // Check milestone rewards
+    const milestone = REFERRAL_REWARDS.find(r => r.count === newCount);
+    if (milestone) {
+      if (milestone.reward.includes('spins')) {
+        const spinsToAdd = parseInt(milestone.reward.match(/\d+/)[0]);
+        const newSpins = bonusSpins + spinsToAdd;
+        setBonusSpins(newSpins);
+        try { localStorage.setItem('borda_waitlist_spins', newSpins); } catch {}
+      }
+      if (milestone.reward.includes('Skip')) {
+        const skip = parseInt(milestone.reward.match(/\d+/)[0]);
+        const newPos = Math.max(1, position - skip);
+        setPosition(newPos);
+        try { localStorage.setItem('borda_waitlist_position', newPos); } catch {}
+      }
+    }
+
+    // Each referral moves you up ~100 spots
+    const newPos = Math.max(1, position - Math.floor(Math.random() * 80 + 60));
+    setPosition(newPos);
+    try { localStorage.setItem('borda_waitlist_position', newPos); } catch {}
+    launchConfetti();
+  }, [referralCount, bonusSpins, position]);
+
+  return (
+    <div className="container">
+      {/* HERO */}
+      <div className="hero">
+        <div className="hero-badge">
+          <span className="dot" />
+          WAITLIST OPEN
+        </div>
+        <h1>Your savings win you stocks.</h1>
+        <p>
+          Deposit money. Earn spins. Win fractional shares of Apple, Tesla, Netflix, and more.
+          Refer friends to skip the line and earn bonus spins on launch day.
+        </p>
+
+        {!signedUp ? (
+          <>
+            <form className="signup-form" onSubmit={handleSignup}>
+              <input
+                ref={inputRef}
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                autoComplete="email"
+                required
+              />
+              <button type="submit" disabled={submitting}>
+                {submitting ? 'Joining...' : 'Join Waitlist'}
+              </button>
+            </form>
+            {error && <p style={{ color: '#FF6838', fontSize: '13px', textAlign: 'center', marginTop: '8px' }}>{error}</p>}
+            <p className="signup-note">No purchase necessary. Free to join. Unsubscribe anytime.</p>
+          </>
+        ) : null}
+
+        <div className="stats-bar">
+          <div className="stat">
+            <div className="stat-value">{(TOTAL_WAITLIST).toLocaleString()}+</div>
+            <div className="stat-label">ON WAITLIST</div>
+          </div>
+          <div className="stat">
+            <div className="stat-value">17</div>
+            <div className="stat-label">STOCKS</div>
+          </div>
+          <div className="stat">
+            <div className="stat-value">$12M+</div>
+            <div className="stat-label">IN PRIZES</div>
+          </div>
+        </div>
+      </div>
+
+      {/* POST-SIGNUP VIEW */}
+      <div className={`post-signup ${signedUp ? 'active' : ''}`}>
+        {/* Position Card */}
+        <div className="position-card">
+          <div className="position-label">YOUR POSITION</div>
+          <div className="position-number">#{position.toLocaleString()}</div>
+          <div className="position-total">of {TOTAL_WAITLIST.toLocaleString()} people</div>
+          <div className="position-bar">
+            <div className="position-bar-fill" style={{ width: `${positionPercent}%` }} />
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '12px' }}>
+            You're ahead of {Math.round(positionPercent)}% of the waitlist
+          </p>
+        </div>
+
+        {/* Rewards Summary */}
+        <div className="rewards-card">
+          <div className="rewards-title">YOUR REWARDS</div>
+          <div className="reward-row">
+            <div className="reward-icon" style={{ background: 'var(--green-glow)' }}>🎰</div>
+            <div className="reward-text">
+              <strong>Bonus Spins</strong>
+              <span>Earned from signups + referrals</span>
+            </div>
+            <div className="reward-value">{bonusSpins}</div>
+          </div>
+          <div className="reward-row">
+            <div className="reward-icon" style={{ background: 'rgba(255,184,0,0.1)' }}>👥</div>
+            <div className="reward-text">
+              <strong>Referrals</strong>
+              <span>Friends who joined</span>
+            </div>
+            <div className="reward-value" style={{ color: 'var(--gold)' }}>{referralCount}</div>
+          </div>
+        </div>
+
+        {/* Referral Link */}
+        <div className="referral-section">
+          <div className="referral-label">YOUR REFERRAL LINK</div>
+          <div className="referral-link-box">
+            <div className="referral-link">{referralLink}</div>
+            <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy}>
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+
+        {/* Share Buttons */}
+        <div className="share-grid">
+          <a className="share-btn" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(referralLink)}`} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Post on X
+          </a>
+          <a className="share-btn" href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + referralLink)}`} target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </a>
+          <a className="share-btn" href={`sms:?body=${encodeURIComponent(shareText + ' ' + referralLink)}`}>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/><path d="M7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
+            Text
+          </a>
+          <button className="share-btn" onClick={handleNativeShare}>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+            Share
+          </button>
+        </div>
+
+        {/* Referral Milestones */}
+        <div className="referral-tracker">
+          <div className="tracker-header">
+            <div className="tracker-title">REFERRAL MILESTONES</div>
+            <div className="tracker-count">{referralCount} / {REFERRAL_REWARDS[REFERRAL_REWARDS.length - 1].count}</div>
+          </div>
+          <div className="tracker-milestones">
+            {REFERRAL_REWARDS.map((r, i) => (
+              <div key={i} className={`milestone ${referralCount >= r.count ? 'achieved' : ''}`}>
+                <div className="milestone-count">{r.icon}</div>
+                <div className="milestone-count">{r.count}</div>
+                <div className="milestone-reward">{r.reward}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Demo button (remove in production) */}
+        <button onClick={simulateReferral} style={{
+          width: '100%', padding: '12px', borderRadius: '12px', border: '1px dashed var(--border)',
+          background: 'transparent', color: 'var(--text-muted)', fontFamily: 'inherit', fontSize: '12px',
+          cursor: 'pointer', marginBottom: '24px',
+        }}>
+          [Demo] Simulate a friend joining via your link
+        </button>
+      </div>
+
+      {/* HOW IT WORKS */}
+      <div className="how-section">
+        <h2 className="how-title">How Borda Works</h2>
+        <div className="how-steps">
+          <div className="how-step">
+            <div className="how-step-num">1</div>
+            <div>
+              <h3>Save</h3>
+              <p>Deposit money into your Borda savings account. Your money is yours — withdraw anytime.</p>
+            </div>
+          </div>
+          <div className="how-step">
+            <div className="how-step-num">2</div>
+            <div>
+              <h3>Earn Spins</h3>
+              <p>Every $1,000 in savings earns you 1 daily spin on the stock slot machine. More savings = more spins.</p>
+            </div>
+          </div>
+          <div className="how-step">
+            <div className="how-step-num">3</div>
+            <div>
+              <h3>Win Stocks</h3>
+              <p>Spin the reels and win fractional shares of real companies — Apple, Tesla, Netflix, and 14 more.</p>
+            </div>
+          </div>
+          <div className="how-step">
+            <div className="how-step-num">4</div>
+            <div>
+              <h3>Refer &amp; Rise</h3>
+              <p>Share your link to move up the waitlist and earn bonus spins. Top referrers get priority access.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* DEMO CTA */}
+      <div style={{ textAlign: 'center', margin: '32px 0' }}>
+        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '12px' }}>Want to see the app in action?</p>
+        <a href="/demo-user" style={{
+          display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px',
+          borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-secondary)',
+          color: 'var(--text-primary)', fontFamily: "'Space Grotesk', sans-serif", fontSize: '14px',
+          fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s',
+        }}>
+          Try the Demo
+          <span style={{ fontSize: '16px' }}>→</span>
+        </a>
+      </div>
+
+      {/* FOOTER */}
+      <div className="footer">
+        <div className="footer-logo">Borda</div>
+        <p>
+          No purchase necessary. Void where prohibited. Sweepstakes savings product.
+          Your savings are not at risk — only spins are used to play.
+          <br /><br />
+          <a href="/demo-user">Try Demo</a> · <a href="/rules">Official Rules</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Mount
+const root = ReactDOM.createRoot(document.getElementById('waitlist-root'));
+root.render(React.createElement(WaitlistApp));
+  </script>
+</body>
+</html>
