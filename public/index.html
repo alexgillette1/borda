@@ -237,31 +237,61 @@ const WaitlistApp = () => {
     setError('');
     setSubmitting(true);
 
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 1200));
-
-    const pos = Math.floor(Math.random() * 3000) + 800;
-    const code = generateCode();
-
-    setPosition(pos);
-    setReferralCode(code);
-    setSignedUp(true);
-    setBonusSpins(3); // Welcome bonus
-
     try {
-      localStorage.setItem('borda_waitlist_signed_up', 'true');
-      localStorage.setItem('borda_waitlist_position', pos);
-      localStorage.setItem('borda_waitlist_code', code);
-      localStorage.setItem('borda_waitlist_email', email);
-      localStorage.setItem('borda_waitlist_spins', '3');
-    } catch {}
+      // Get referral code from URL if present
+      const params = new URLSearchParams(window.location.search);
+      const referredBy = params.get('ref') || null;
+
+      const resp = await fetch('/api/waitlist/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), referredBy }),
+      });
+      const data = await resp.json();
+
+      if (resp.ok && (data.success || data.alreadyExists)) {
+        setPosition(data.position);
+        setReferralCode(data.referralCode);
+        setSignedUp(true);
+        setBonusSpins(data.bonusSpins || 3);
+        setReferralCount(data.referralCount || 0);
+
+        try {
+          localStorage.setItem('borda_waitlist_signed_up', 'true');
+          localStorage.setItem('borda_waitlist_position', data.position);
+          localStorage.setItem('borda_waitlist_code', data.referralCode);
+          localStorage.setItem('borda_waitlist_email', email);
+          localStorage.setItem('borda_waitlist_spins', data.bonusSpins || 3);
+          localStorage.setItem('borda_waitlist_referrals', data.referralCount || 0);
+        } catch {}
+
+        launchConfetti();
+        if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      // Fallback to client-side if API unavailable
+      const pos = Math.floor(Math.random() * 3000) + 800;
+      const code = generateCode();
+      setPosition(pos);
+      setReferralCode(code);
+      setSignedUp(true);
+      setBonusSpins(3);
+      try {
+        localStorage.setItem('borda_waitlist_signed_up', 'true');
+        localStorage.setItem('borda_waitlist_position', pos);
+        localStorage.setItem('borda_waitlist_code', code);
+        localStorage.setItem('borda_waitlist_email', email);
+        localStorage.setItem('borda_waitlist_spins', '3');
+      } catch {}
+      launchConfetti();
+    }
 
     setSubmitting(false);
-    launchConfetti();
-    if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
   }, [email]);
 
-  const referralLink = `https://borda.ai/waitlist?ref=${referralCode}`;
+  const referralLink = `${window.location.origin}?ref=${referralCode}`;
   const positionPercent = position > 0 ? Math.max(5, Math.min(95, (1 - position / TOTAL_WAITLIST) * 100)) : 0;
 
   const handleCopy = useCallback(() => {
@@ -281,35 +311,31 @@ const WaitlistApp = () => {
     }
   }, [shareText, referralLink, handleCopy]);
 
-  // Simulate referral coming in (for demo)
-  const simulateReferral = useCallback(() => {
-    const newCount = referralCount + 1;
-    setReferralCount(newCount);
-    try { localStorage.setItem('borda_waitlist_referrals', newCount); } catch {}
-
-    // Check milestone rewards
-    const milestone = REFERRAL_REWARDS.find(r => r.count === newCount);
-    if (milestone) {
-      if (milestone.reward.includes('spins')) {
-        const spinsToAdd = parseInt(milestone.reward.match(/\d+/)[0]);
-        const newSpins = bonusSpins + spinsToAdd;
-        setBonusSpins(newSpins);
-        try { localStorage.setItem('borda_waitlist_spins', newSpins); } catch {}
+  // Refresh status from API
+  const refreshStatus = useCallback(async () => {
+    if (!referralCode) return;
+    try {
+      const resp = await fetch(`/api/waitlist/status/${encodeURIComponent(referralCode)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.position) setPosition(data.position);
+        if (data.bonus_spins !== undefined) setBonusSpins(data.bonus_spins);
+        if (data.referral_count !== undefined) setReferralCount(data.referral_count);
+        try {
+          localStorage.setItem('borda_waitlist_position', data.position);
+          localStorage.setItem('borda_waitlist_spins', data.bonus_spins);
+          localStorage.setItem('borda_waitlist_referrals', data.referral_count);
+        } catch {}
       }
-      if (milestone.reward.includes('Skip')) {
-        const skip = parseInt(milestone.reward.match(/\d+/)[0]);
-        const newPos = Math.max(1, position - skip);
-        setPosition(newPos);
-        try { localStorage.setItem('borda_waitlist_position', newPos); } catch {}
-      }
-    }
+    } catch {}
+  }, [referralCode]);
 
-    // Each referral moves you up ~100 spots
-    const newPos = Math.max(1, position - Math.floor(Math.random() * 80 + 60));
-    setPosition(newPos);
-    try { localStorage.setItem('borda_waitlist_position', newPos); } catch {}
-    launchConfetti();
-  }, [referralCount, bonusSpins, position]);
+  // Auto-refresh status every 30 seconds
+  useEffect(() => {
+    if (!signedUp || !referralCode) return;
+    const interval = setInterval(refreshStatus, 30000);
+    return () => clearInterval(interval);
+  }, [signedUp, referralCode, refreshStatus]);
 
   return (
     <div className="container">
@@ -446,13 +472,13 @@ const WaitlistApp = () => {
           </div>
         </div>
 
-        {/* Demo button (remove in production) */}
-        <button onClick={simulateReferral} style={{
-          width: '100%', padding: '12px', borderRadius: '12px', border: '1px dashed var(--border)',
-          background: 'transparent', color: 'var(--text-muted)', fontFamily: 'inherit', fontSize: '12px',
-          cursor: 'pointer', marginBottom: '24px',
+        {/* Refresh status button */}
+        <button onClick={refreshStatus} style={{
+          width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--border)',
+          background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontFamily: 'inherit', fontSize: '13px',
+          cursor: 'pointer', marginBottom: '24px', transition: 'all 0.2s',
         }}>
-          [Demo] Simulate a friend joining via your link
+          ↻ Refresh your status
         </button>
       </div>
 

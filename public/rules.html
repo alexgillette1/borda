@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Borda — Official Sweepstakes Rules</title>
+  <meta name="description" content="Official rules for the Borda Savings Sweepstakes. No purchase necessary. Open to legal US residents 18+.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0B0E11;
+      --bg2: #12151A;
+      --bg3: #1A1E26;
+      --green: #00DC82;
+      --red: #FF6838;
+      --text: #EAECEF;
+      --text2: #848E9C;
+      --text3: #5E6673;
+      --border: rgba(255,255,255,0.06);
+    }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--green);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 32px;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--text2);
+      margin-bottom: 8px;
+    }
+    .updated {
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 32px;
+    }
+    .notice-banner {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+    .notice-banner p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+    .notice-banner p:last-child { margin-bottom: 0; }
+    .notice-banner strong { color: var(--text); }
+    .section {
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      color: var(--green);
+      margin-right: 6px;
+    }
+    p, li {
+      font-size: 15px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    ul, ol {
+      padding-left: 24px;
+      margin-bottom: 16px;
+    }
+    ol li { margin-bottom: 8px; }
+    ul li { margin-bottom: 6px; }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    strong { color: var(--text); }
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card p {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .card p:last-child { margin-bottom: 0; }
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg2);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    thead th {
+      background: var(--bg3);
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    thead th:first-child { border-radius: 12px 0 0 0; }
+    thead th:last-child { border-radius: 0 12px 0 0; }
+    tbody td {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text2);
+      border-top: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
+    tbody tr:hover { background: rgba(0,220,130,0.02); }
+    .ticker {
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--text);
+    }
+    .stock-name { color: var(--text3); }
+    .tier-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .tier-common { background: rgba(0,220,130,0.08); color: #00DC82; }
+    .tier-uncommon { background: rgba(66,133,244,0.08); color: #4285F4; }
+    .tier-rare { background: rgba(156,39,176,0.08); color: #CE93D8; }
+    .tier-epic { background: rgba(255,152,0,0.08); color: #FF9800; }
+    .tier-legendary { background: rgba(255,215,0,0.08); color: #FFD700; }
+    .odds-good { color: #00DC82; font-weight: 600; }
+    .odds-mid { color: #4285F4; font-weight: 600; }
+    .odds-hard { color: #CE93D8; font-weight: 600; }
+    .odds-rare { color: #FF9800; font-weight: 600; }
+    .odds-legendary { color: #FFD700; font-weight: 600; }
+    .footer {
+      text-align: center;
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .footer p {
+      font-size: 12px;
+      color: var(--text3);
+    }
+    .footer a {
+      color: var(--green);
+      text-decoration: none;
+      margin: 0 4px;
+    }
+    .footer a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      h1 { font-size: 24px; }
+      h2 { font-size: 18px; }
+      p, li { font-size: 14px; }
+      table { font-size: 12px; }
+      thead th, tbody td { padding: 8px 10px; }
+      .container { padding: 24px 16px 60px; }
+      .notice-banner { padding: 16px; }
+      .card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">&larr; Back to Borda</a>
+
+    <h1>Official Sweepstakes Rules</h1>
+    <p class="subtitle">Borda Savings Sweepstakes &mdash; Complete Official Rules</p>
+    <p class="updated">Effective Date: January 1, 2026 &nbsp;|&nbsp; Last Updated: <span id="update-date"></span></p>
+
+    <div class="notice-banner">
+      <p><strong>NO PURCHASE OR PAYMENT IS NECESSARY TO ENTER OR WIN. A PURCHASE OR PAYMENT OF ANY KIND WILL NOT INCREASE YOUR CHANCES OF WINNING.</strong></p>
+      <p>Void where prohibited by law. Open only to legal residents of the fifty (50) United States and the District of Columbia (excluding residents of Connecticut, Hawaii, Idaho, Indiana, Maine, Michigan, Montana, New Jersey, New York, Nevada, Tennessee, and Washington), who are eighteen (18) years of age or older at the time of entry. Subject to all applicable federal, state, and local laws and regulations.</p>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="section">
+      <h2><span class="section-num">1.</span> Sponsor</h2>
+      <p>The Borda Savings Sweepstakes (the "Sweepstakes") is sponsored by Borda, Inc., a Delaware corporation, with its principal office located at 1209 Orange Street, Wilmington, Delaware 19801 ("Sponsor"). The Sweepstakes is administered by Sponsor or its designated agents. Sponsor is solely responsible for all aspects of the Sweepstakes.</p>
+      <p>For questions regarding the Sweepstakes, contact the Sponsor at <a href="mailto:support@borda.ai">support@borda.ai</a>.</p>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section">
+      <h2><span class="section-num">2.</span> Eligibility</h2>
+      <p>The Sweepstakes is open to legal residents of the fifty (50) United States and the District of Columbia who are eighteen (18) years of age or older at the time of entry, except as follows:</p>
+      <ul>
+        <li>Residents of the following states are <strong>not eligible</strong> to participate: Connecticut, Hawaii, Idaho, Indiana, Maine, Michigan, Montana, New Jersey, New York, Nevada, Tennessee, and Washington.</li>
+        <li>Employees, officers, and directors of Borda, Inc., its parent companies, subsidiaries, affiliates, advertising and promotion agencies, prize suppliers, and any entity involved in the development, production, implementation, administration, or fulfillment of the Sweepstakes, and their immediate family members (spouse, parent, child, sibling, and their respective spouses) and individuals living in the same household as such persons, whether or not related, are not eligible to participate.</li>
+        <li>Participation is subject to all applicable federal, state, and local laws and regulations.</li>
+        <li>Entrants must have a valid and active Borda account in good standing, or submit a valid Alternative Method of Entry (AMOE) request (see Section 5), to be eligible.</li>
+      </ul>
+      <p>By entering the Sweepstakes, each entrant represents and warrants that he or she meets the eligibility requirements set forth in these Official Rules. Sponsor reserves the right to verify eligibility and to adjudicate any disputes at any time.</p>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section">
+      <h2><span class="section-num">3.</span> Sweepstakes Period</h2>
+      <p>The Sweepstakes is an ongoing promotional sweepstakes that operates on a continuous daily basis beginning on the Sweepstakes launch date and continuing until terminated by Sponsor in its sole discretion (the "Sweepstakes Period"). Sponsor reserves the right to suspend, modify, or terminate the Sweepstakes at any time, for any reason, with or without prior notice, subject to applicable law.</p>
+      <p>Each "Entry Period" runs from 12:00:00 AM Eastern Time ("ET") to 11:59:59 PM ET on each calendar day during the Sweepstakes Period. Entries earned during a given Entry Period must be used (i.e., spins must be played) on or after the date the entries are credited. Unused entries (spins) do not expire and remain available for use indefinitely during the Sweepstakes Period, unless the Sweepstakes is terminated or the entrant's account is closed or suspended.</p>
+      <p>Sponsor's computer systems and servers are the official timekeeping devices for the Sweepstakes.</p>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="section">
+      <h2><span class="section-num">4.</span> How to Enter &mdash; Savings Deposit Method</h2>
+      <p>During the Sweepstakes Period, eligible entrants who have a valid Borda account may earn entries ("Spins") by maintaining a savings deposit balance within the Borda application. Entries are earned automatically as follows:</p>
+
+      <div class="card">
+        <div class="card-label">Entry Earning Method</div>
+        <p>Each eligible entrant earns <strong>one (1) Spin for every one thousand dollars ($1,000.00) in average daily savings balance</strong> maintained in the entrant's Borda savings account. Spin allocations are calculated and credited daily at the close of each Entry Period based on the entrant's savings balance as of the daily calculation time.</p>
+        <p>For example, an entrant with a $5,000 daily average savings balance would earn 5 Spins per day. An entrant with a $500 daily average savings balance would earn 0 Spins for that day via this method. Fractional Spins are not awarded; the calculation is rounded down to the nearest whole number.</p>
+      </div>
+
+      <p>Depositing money into a Borda savings account constitutes an investment/savings decision and is <strong>not</strong> a purchase or payment for purposes of entering the Sweepstakes. The Sweepstakes entry is a bonus provided to savers; all savings deposits are held in FDIC-insured accounts at partner banking institutions and may be withdrawn at any time, subject to the terms of the Borda Savings Account Agreement.</p>
+      <p>A purchase, deposit, or payment will <strong>not</strong> increase an entrant's chances of winning on any individual Spin. Each Spin carries the same fixed odds of winning regardless of the entrant's deposit amount, account balance, or total number of Spins earned.</p>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="section">
+      <h2><span class="section-num">5.</span> Alternative Method of Entry (AMOE)</h2>
+      <p><strong>NO PURCHASE OR SAVINGS DEPOSIT IS NECESSARY TO ENTER OR WIN.</strong> Eligible entrants may receive free entries without opening a Borda account, making any deposit, or any other purchase or payment, by using either of the following Alternative Methods of Entry:</p>
+
+      <div class="card">
+        <div class="card-label">Option A &mdash; Email Request</div>
+        <p>Send an email to <a href="mailto:amoe@borda.ai">amoe@borda.ai</a> with the subject line "AMOE Entry Request" and include your full legal name, mailing address (street address, city, state, ZIP code), date of birth, email address, and phone number in the body of the email. Upon receipt and verification of a valid AMOE request, Sponsor will credit the entrant with <strong>one (1) free Spin per valid daily request</strong>. Limit: one (1) AMOE entry per person per Entry Period (calendar day). AMOE entries received after the close of an Entry Period will be applied to the next Entry Period.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Option B &mdash; Mail-In Request</div>
+        <p>Hand-print your full legal name, mailing address (street address, city, state, ZIP code), date of birth, email address, and phone number on a 3" x 5" card and mail it in a #10 envelope with first-class postage to:</p>
+        <p style="margin: 12px 0; padding-left: 16px; border-left: 2px solid var(--border);">
+          <strong>Borda Savings Sweepstakes &mdash; AMOE</strong><br>
+          Borda, Inc.<br>
+          1209 Orange Street<br>
+          Wilmington, DE 19801
+        </p>
+        <p>Each valid mail-in request received will earn the entrant <strong>one (1) free Spin</strong>. Limit: one (1) mail-in AMOE entry per person per Entry Period. Entries must be postmarked during the applicable Entry Period and received within seven (7) business days of the postmark date. Mechanically reproduced entries will not be accepted.</p>
+      </div>
+
+      <p>All AMOE entries carry the same odds of winning as entries earned through the savings deposit method. AMOE entrants will receive instructions for accessing their free Spins via email within five (5) business days of receipt of a valid request. Sponsor is not responsible for lost, late, misdirected, damaged, incomplete, illegible, or postage-due mail. Proof of mailing does not constitute proof of delivery.</p>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="section">
+      <h2><span class="section-num">6.</span> Spin Mechanics</h2>
+      <p>Each Spin entitles the entrant to one play of the Borda slot machine game. The game operates as follows:</p>
+
+      <div class="card">
+        <div class="card-label">Slot Machine Configuration</div>
+        <p>The Borda slot machine is a <strong>3-reel, 3-row digital slot machine</strong> displaying a 3&times;3 grid of stock ticker symbols. Each reel contains symbols representing the 25 stocks available in the Sweepstakes prize pool. The outcome of each Spin is determined by a cryptographically secure pseudorandom number generator (CSPRNG) at the time the Spin is executed. All outcomes are final and non-reversible.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Paylines</div>
+        <p>The slot machine features up to <strong>three (3) paylines</strong>:</p>
+        <ul>
+          <li><strong>Payline 1 &mdash; Center Row:</strong> The middle row across all three reels (always active on every Spin).</li>
+          <li><strong>Payline 2 &mdash; Diagonal (top-left to bottom-right):</strong> Active only when the entrant selects 3-line play.</li>
+          <li><strong>Payline 3 &mdash; Diagonal (bottom-left to top-right):</strong> Active only when the entrant selects 3-line play.</li>
+        </ul>
+        <p>A winning combination occurs when all three (3) positions on a single payline display the <strong>same stock ticker symbol</strong> (a "3-of-a-kind"). Each payline is evaluated independently. An entrant may win on zero, one, two, or all three paylines in a single Spin.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Share Multiplier</div>
+        <p>Before each Spin, the entrant may select a <strong>share multiplier</strong> of 1&times;, 2&times;, 3&times;, or 5&times;. The multiplier determines both the number of Spins consumed per play and the number of fractional or whole shares awarded per winning payline:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Multiplier</th>
+              <th>Spins Per Pull (1 Line)</th>
+              <th>Spins Per Pull (3 Lines)</th>
+              <th>Shares Won Per Winning Line</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>1&times;</strong></td><td>1</td><td>3</td><td>1 share</td></tr>
+            <tr><td><strong>2&times;</strong></td><td>2</td><td>6</td><td>2 shares</td></tr>
+            <tr><td><strong>3&times;</strong></td><td>3</td><td>9</td><td>3 shares</td></tr>
+            <tr><td><strong>5&times;</strong></td><td>5</td><td>15</td><td>5 shares</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px; color:var(--text3); margin-top:4px;">The share multiplier does not affect the odds of winning on any given payline. It affects only the number of Spins consumed and the quantity of shares awarded upon a win.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 7 -->
+    <div class="section">
+      <h2><span class="section-num">7.</span> Prizes &amp; Odds</h2>
+      <p>The Sweepstakes awards prizes in the form of fractional or whole shares of publicly traded stocks. There are twenty-five (25) stocks available in the prize pool, organized into five (5) rarity tiers based on approximate share price. The odds of winning each specific stock on a single payline are fixed and disclosed in the table below.</p>
+      <p>Each active payline has a <strong>1 in 20 (5.0%)</strong> chance of producing a 3-of-a-kind winning combination per Spin. When a win occurs, the stock awarded is determined by a two-step weighted random selection:</p>
+      <ol>
+        <li><strong>Tier selection:</strong> A rarity tier is selected according to the fixed tier weights: Common (55%), Uncommon (25%), Rare (12%), Epic (6%), Legendary (2%).</li>
+        <li><strong>Stock selection:</strong> Within the selected tier, the specific stock is chosen proportionally to its assigned weight.</li>
+      </ol>
+
+      <p style="font-weight:600; color:var(--text); margin-top:24px; margin-bottom:12px;">Complete Odds Table &mdash; Per-Stock Winning Probability (Per Active Payline, Per Spin)</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Approx. Share Price</th>
+            <th>Tier</th>
+            <th>Odds Per Payline</th>
+            <th>Approx. Value (1&times;)</th>
+          </tr>
+        </thead>
+        <tbody id="odds-table"></tbody>
+      </table>
+
+      <p style="font-size:12px; color:var(--text3);">* Share prices shown are approximate reference prices and fluctuate based on market conditions. Actual prize value is determined by the fair market value of the shares at the time of crediting. Odds are exact mathematical probabilities derived from the game&rsquo;s source code and are not estimates. With 3-line play, each payline is independent; the approximate probability of winning any prize on at least one payline per Spin is ~14.3%.</p>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-label">Total Number of Prizes</div>
+        <p>The total number of prizes available during the Sweepstakes Period is unlimited and depends on the number of eligible Spins played. Each Spin is an independent event with the same fixed odds. There is no cap on the total number of prizes that may be awarded during the Sweepstakes Period.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Approximate Retail Value (ARV) Range</div>
+        <p>The approximate retail value of a single prize ranges from <strong>$5.53</strong> (1 share of SNAP at a 1&times; multiplier) to <strong>$3,342.85</strong> (5 shares of META at a 5&times; multiplier), depending on the stock won, the share multiplier selected, and market conditions at the time of crediting. Actual prize values will vary.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 8 -->
+    <div class="section">
+      <h2><span class="section-num">8.</span> Prize Conditions</h2>
+      <p>All prizes are subject to the following conditions:</p>
+      <ul>
+        <li><strong>Brokerage Services:</strong> All stock prizes are delivered as fractional or whole shares of publicly traded securities through Alpaca Securities LLC ("Alpaca"), a registered broker-dealer and member of FINRA/SIPC. To receive stock prizes, winners must have or open an Alpaca brokerage account linked to their Borda account. Alpaca Securities LLC provides brokerage services; Borda, Inc. is not a broker-dealer and does not provide investment advice.</li>
+        <li><strong>Hold Option:</strong> Winners may hold their fractional shares indefinitely in their linked brokerage account, subject to Alpaca's account terms and applicable regulations. Shares are fully owned by the winner and may appreciate or depreciate in value based on market conditions.</li>
+        <li><strong>Cash-Out Option:</strong> Winners may sell their shares and withdraw the proceeds to their Borda cash balance. A <strong>3% placement fee</strong> is deducted from the gross sale proceeds at the time of cash-out. For example, selling shares worth $100.00 would yield $97.00 in cash after the fee.</li>
+        <li><strong>Convert to Spins:</strong> Winners may convert their share holdings to additional Spins at a rate based on the current market value of the shares. No placement fee applies to spin conversions.</li>
+        <li><strong>Non-Transferable:</strong> Prizes are non-transferable and may not be assigned, sold, or traded to any third party, except through the cash-out or conversion mechanisms described above. No prize substitutions are permitted except at Sponsor's sole discretion.</li>
+        <li><strong>Taxes:</strong> All federal, state, and local taxes on prizes are the sole responsibility of the winner. Winners who receive prizes with an aggregate value of $600 or more in a calendar year will receive an IRS Form 1099-MISC (or applicable tax form) from Sponsor or its agent. Winners may be required to provide a valid Social Security number or taxpayer identification number and complete an IRS Form W-9 before prizes are released.</li>
+        <li><strong>Compliance:</strong> Prizes are subject to all applicable securities regulations, brokerage account requirements, and applicable laws. Sponsor makes no representations regarding the future value of any stock prize.</li>
+      </ul>
+    </div>
+
+    <!-- SECTION 9 -->
+    <div class="section">
+      <h2><span class="section-num">9.</span> Winner Notification &amp; Claiming</h2>
+      <p>Winners are notified instantly within the Borda application upon the occurrence of a winning Spin. Winning shares are credited to the winner's linked Alpaca brokerage account automatically, typically within one (1) to three (3) business days following the winning Spin, subject to market hours and settlement requirements.</p>
+      <p>If a winner's Alpaca brokerage account is not active or in good standing at the time of crediting, the prize will be held in pending status for up to thirty (30) days while the winner resolves any account issues. If the winner fails to maintain an eligible brokerage account within the 30-day period, the prize will be forfeited and no alternative prize or compensation will be provided.</p>
+      <p>Sponsor reserves the right to require proof of identity and eligibility before releasing any prize. Failure to provide requested verification within fourteen (14) days of the request may result in forfeiture of the prize.</p>
+      <p>If a prize notification is returned as undeliverable, or if a winner is found to be ineligible or not in compliance with these Official Rules, the prize will be forfeited.</p>
+    </div>
+
+    <!-- SECTION 10 -->
+    <div class="section">
+      <h2><span class="section-num">10.</span> General Conditions</h2>
+      <p>By entering the Sweepstakes, each entrant agrees to be bound by these Official Rules and the decisions of the Sponsor, which are final and binding in all respects. Sponsor reserves the right, in its sole discretion, to:</p>
+      <ul>
+        <li>Modify, suspend, or terminate the Sweepstakes (or any portion thereof) at any time, for any reason, including but not limited to: tampering, unauthorized intervention, fraud, technical failures, regulatory changes, or any other cause that corrupts or affects the administration, security, fairness, or integrity of the Sweepstakes.</li>
+        <li>Modify these Official Rules at any time, with notice to active participants via the Borda application or email. Continued participation after notice constitutes acceptance of the modified rules.</li>
+        <li>Disqualify any entrant who Sponsor determines, in its sole discretion, has: (a) tampered with the entry process or the operation of the Sweepstakes; (b) acted in violation of these Official Rules; (c) acted in a disruptive, unsportsmanlike, or abusive manner; or (d) attempted to undermine the legitimate operation of the Sweepstakes by fraud, deception, or other unfair practices.</li>
+        <li>Cancel, modify, or suspend the Sweepstakes due to events beyond Sponsor's reasonable control, including but not limited to: acts of God, war, terrorism, fire, flood, pandemic, epidemic, government action, labor disputes, technical failures, cyberattacks, or any event constituting force majeure.</li>
+      </ul>
+      <p>Sponsor reserves the right to prohibit the use of automated entry devices, scripts, bots, or other automated means of entry. Any attempt to deliberately damage or undermine the legitimate operation of the Sweepstakes may be a violation of criminal and civil laws. Sponsor reserves the right to seek damages and other remedies from any such person to the fullest extent permitted by law.</p>
+      <p>Proof of submitting an entry shall not be deemed proof of receipt by Sponsor. Sponsor is not responsible for technical, hardware, software, telephone, network, electronic, computer, or other errors or malfunctions of any kind, including but not limited to: failed, incomplete, garbled, or delayed computer transmissions; inaccessibility of any website; hardware or software malfunctions, failures, or difficulties; or any other errors or difficulties of any kind, whether human, mechanical, electronic, computer, network, typographical, printing, or otherwise, relating to or in connection with the Sweepstakes.</p>
+    </div>
+
+    <!-- SECTION 11 -->
+    <div class="section">
+      <h2><span class="section-num">11.</span> Release &amp; Limitations of Liability</h2>
+      <p>By participating in the Sweepstakes, each entrant agrees to release and hold harmless Sponsor, its parent companies, subsidiaries, affiliates, advertising and promotion agencies, prize suppliers (including Alpaca Securities LLC), and each of their respective officers, directors, employees, agents, successors, and assigns (collectively, the "Released Parties") from and against any and all claims, damages, losses, costs, expenses, and liabilities (including reasonable attorneys' fees) arising out of or relating to:</p>
+      <ul>
+        <li>Participation in the Sweepstakes or any Sweepstakes-related activities;</li>
+        <li>The acceptance, possession, use, misuse, or non-use of any prize (including any stock prize);</li>
+        <li>Any change in the value of any stock prize after it is awarded, including any loss, depreciation, or delisting of any stock;</li>
+        <li>Any technical malfunction, error, omission, interruption, defect, or delay in the operation or transmission of information;</li>
+        <li>Any personal injury, death, or property damage arising from participation in the Sweepstakes;</li>
+        <li>Any tax obligations arising from receipt of a prize;</li>
+        <li>Any unauthorized access to or use of entrant's Borda account or personal information.</li>
+      </ul>
+      <p><strong>LIMITATION OF LIABILITY:</strong> IN NO EVENT SHALL THE RELEASED PARTIES BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE SWEEPSTAKES, REGARDLESS OF THE FORM OF ACTION AND WHETHER OR NOT THE RELEASED PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THE AGGREGATE LIABILITY OF THE RELEASED PARTIES ARISING OUT OF OR RELATING TO THE SWEEPSTAKES SHALL NOT EXCEED THE APPROXIMATE RETAIL VALUE OF THE PRIZE WON BY THE APPLICABLE ENTRANT.</p>
+      <p>Some jurisdictions do not allow the limitation or exclusion of liability for incidental or consequential damages, so the above limitation may not apply to you. In such jurisdictions, the liability of the Released Parties shall be limited to the fullest extent permitted by applicable law.</p>
+    </div>
+
+    <!-- SECTION 12 -->
+    <div class="section">
+      <h2><span class="section-num">12.</span> Disputes &amp; Governing Law</h2>
+      <p>Except where prohibited by law, as a condition of participating in the Sweepstakes, each entrant agrees that:</p>
+      <ol>
+        <li>Any and all disputes, claims, and causes of action arising out of or connected with the Sweepstakes, or any prizes awarded, shall be resolved <strong>individually</strong>, without resort to any form of class action.</li>
+        <li>Any and all disputes, claims, and causes of action shall be resolved exclusively by binding arbitration administered by the American Arbitration Association ("AAA") under its Consumer Arbitration Rules then in effect, and judgment on the award rendered by the arbitrator may be entered in any court having jurisdiction thereof.</li>
+        <li>These Official Rules and all disputes arising hereunder shall be governed by, and construed in accordance with, the laws of the <strong>State of Delaware</strong>, without regard to its conflict of laws principles.</li>
+        <li>Any arbitration under these Official Rules shall take place in Wilmington, Delaware, unless otherwise agreed by the parties or ordered by the arbitrator.</li>
+        <li>Any claims, judgments, and awards shall be limited to actual out-of-pocket costs incurred, and in no event shall entrant be entitled to receive attorneys' fees or any incidental, indirect, special, consequential, or punitive damages.</li>
+        <li><strong>CLASS ACTION WAIVER:</strong> TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, ENTRANT AGREES THAT ANY CLAIM ARISING OUT OF OR RELATED TO THE SWEEPSTAKES MUST BE BROUGHT IN THE ENTRANT'S INDIVIDUAL CAPACITY, AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED CLASS, CONSOLIDATED, OR REPRESENTATIVE PROCEEDING.</li>
+      </ol>
+      <p>If any provision of these Official Rules is held to be invalid or unenforceable, the remaining provisions shall remain in full force and effect.</p>
+    </div>
+
+    <!-- SECTION 13 -->
+    <div class="section">
+      <h2><span class="section-num">13.</span> Privacy</h2>
+      <p>Information collected from entrants in connection with the Sweepstakes is subject to Sponsor's Privacy Policy, available at <a href="/privacy">borda.ai/privacy</a>. By entering the Sweepstakes, each entrant consents to the collection, use, and disclosure of his or her personal information as described in the Privacy Policy and these Official Rules.</p>
+      <p>Personal information collected in connection with the Sweepstakes will be used for the administration of the Sweepstakes, including verifying eligibility, notifying winners, delivering prizes, and complying with applicable laws and regulations. Sponsor may also use entrant information for marketing and promotional purposes, subject to the entrant's right to opt out as described in the Privacy Policy.</p>
+      <p>Sponsor will not sell entrants' personal information to third parties. Sponsor may share personal information with service providers and agents who assist in the administration of the Sweepstakes (including Alpaca Securities LLC for prize fulfillment), as required by law, or as otherwise described in the Privacy Policy.</p>
+      <p>For AMOE entries, the personal information provided (name, address, date of birth, email, phone number) will be used solely for the purpose of administering the AMOE entry and will be subject to the same privacy protections as all other entrant information.</p>
+    </div>
+
+    <!-- SECTION 14 -->
+    <div class="section">
+      <h2><span class="section-num">14.</span> Winner&rsquo;s List</h2>
+      <p>For a list of winners of prizes valued at $25.00 or more, or a copy of these Official Rules, send a self-addressed, stamped envelope to:</p>
+
+      <div class="card">
+        <p style="margin:0; padding-left:0;">
+          <strong>Borda Savings Sweepstakes &mdash; Winner's List / Official Rules Request</strong><br>
+          Borda, Inc.<br>
+          1209 Orange Street<br>
+          Wilmington, DE 19801
+        </p>
+      </div>
+
+      <p>Winner's list requests must be received within sixty (60) days of the date the prizes were awarded. Please specify whether you are requesting a winner's list or a copy of the Official Rules in your correspondence. Alternatively, you may request a winner's list by emailing <a href="mailto:support@borda.ai">support@borda.ai</a> with the subject line "Winner's List Request."</p>
+    </div>
+
+    <!-- SECTION 15 -->
+    <div class="section">
+      <h2><span class="section-num">15.</span> Sponsor Contact Information</h2>
+
+      <div class="card">
+        <div class="card-label">Sponsor</div>
+        <p style="margin:0;">
+          <strong>Borda, Inc.</strong><br>
+          1209 Orange Street<br>
+          Wilmington, DE 19801<br>
+          United States of America
+        </p>
+        <p style="margin-top:12px;">
+          <strong>General Inquiries:</strong> <a href="mailto:support@borda.ai">support@borda.ai</a><br>
+          <strong>AMOE Entries:</strong> <a href="mailto:amoe@borda.ai">amoe@borda.ai</a><br>
+          <strong>Website:</strong> <a href="https://borda.ai">borda.ai</a>
+        </p>
+      </div>
+
+      <p style="margin-top:20px; font-size:13px; color:var(--text3);">These Official Rules constitute the complete and exclusive statement of the terms and conditions of the Borda Savings Sweepstakes. No other representations, warranties, or conditions, whether express, implied, statutory, or otherwise, are made by Sponsor with respect to the Sweepstakes. By participating in the Sweepstakes, each entrant acknowledges that he or she has read, understands, and agrees to be bound by these Official Rules.</p>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <p>&copy; 2026 Borda, Inc. All rights reserved.</p>
+      <p style="margin-top:8px;">
+        <a href="/">Home</a> |
+        <a href="/terms">Terms of Service</a> |
+        <a href="/privacy">Privacy Policy</a> |
+        <a href="/chances">Winning Chances &amp; Odds</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STOCK DATA (mirrored from app) ====================
+    const STOCKS = [
+      // Common (under $50)
+      { ticker: 'SNAP',  name: 'Snap Inc.',           price: 5.53,    weight: 35, tier: 'common' },
+      { ticker: 'F',     name: 'Ford Motor Co.',      price: 10.50,   weight: 35, tier: 'common' },
+      { ticker: 'RIVN',  name: 'Rivian Automotive',   price: 15.06,   weight: 35, tier: 'common' },
+      { ticker: 'SOFI',  name: 'SoFi Technologies',   price: 16.96,   weight: 35, tier: 'common' },
+      { ticker: 'GME',   name: 'GameStop Corp.',      price: 22.64,   weight: 35, tier: 'common' },
+      { ticker: 'NKE',   name: 'Nike Inc.',           price: 35.51,   weight: 35, tier: 'common' },
+      // Uncommon ($50-200)
+      { ticker: 'RBLX',  name: 'Roblox Corp.',        price: 50.15,   weight: 20, tier: 'uncommon' },
+      { ticker: 'PYPL',  name: 'PayPal Holdings',     price: 52.53,   weight: 20, tier: 'uncommon' },
+      { ticker: 'NFLX',  name: 'Netflix Inc.',        price: 71.79,   weight: 20, tier: 'uncommon' },
+      { ticker: 'UBER',  name: 'Uber Technologies',   price: 77.92,   weight: 20, tier: 'uncommon' },
+      { ticker: 'SBUX',  name: 'Starbucks Corp.',     price: 95.71,   weight: 20, tier: 'uncommon' },
+      { ticker: 'DIS',   name: 'Walt Disney Co.',     price: 102.67,  weight: 20, tier: 'uncommon' },
+      { ticker: 'INTC',  name: 'Intel Corp.',         price: 108.60,  weight: 20, tier: 'uncommon' },
+      { ticker: 'HOOD',  name: 'Robinhood Markets',   price: 119.82,  weight: 18, tier: 'uncommon' },
+      { ticker: 'PLTR',  name: 'Palantir Technologies', price: 177.64, weight: 18, tier: 'uncommon' },
+      // Rare ($200-500)
+      { ticker: 'GOOGL', name: 'Alphabet Inc.',       price: 220.50,  weight: 10, tier: 'rare' },
+      { ticker: 'NVDA',  name: 'NVIDIA Corp.',        price: 222.27,  weight: 10, tier: 'rare' },
+      { ticker: 'AMZN',  name: 'Amazon.com Inc.',     price: 244.39,  weight: 10, tier: 'rare' },
+      { ticker: 'COIN',  name: 'Coinbase Global',     price: 265.30,  weight: 10, tier: 'rare' },
+      { ticker: 'AAPL',  name: 'Apple Inc.',          price: 298.01,  weight: 10, tier: 'rare' },
+      { ticker: 'TSLA',  name: 'Tesla Inc.',          price: 364.27,  weight: 8,  tier: 'rare' },
+      { ticker: 'MSFT',  name: 'Microsoft Corp.',     price: 475.00,  weight: 8,  tier: 'rare' },
+      // Epic ($500-650)
+      { ticker: 'SPOT',  name: 'Spotify Technology',  price: 510.97,  weight: 5,  tier: 'epic' },
+      { ticker: 'AMD',   name: 'Advanced Micro Devices', price: 559.82, weight: 5, tier: 'epic' },
+      // Legendary ($650+)
+      { ticker: 'META',  name: 'Meta Platforms Inc.',  price: 668.57,  weight: 2,  tier: 'legendary' },
+    ];
+
+    const WIN_CHANCE_3MATCH = 0.05; // 5% per payline
+    const TIER_WIN_WEIGHTS = { common: 55, uncommon: 25, rare: 12, epic: 6, legendary: 2 };
+    const TIER_WIN_TOTAL = Object.values(TIER_WIN_WEIGHTS).reduce((a, b) => a + b, 0);
+
+    const tierClass = {
+      common: 'tier-common',
+      uncommon: 'tier-uncommon',
+      rare: 'tier-rare',
+      epic: 'tier-epic',
+      legendary: 'tier-legendary'
+    };
+    const oddsClass = {
+      common: 'odds-good',
+      uncommon: 'odds-mid',
+      rare: 'odds-hard',
+      epic: 'odds-rare',
+      legendary: 'odds-legendary'
+    };
+
+    // Build odds table
+    const tbody = document.getElementById('odds-table');
+    STOCKS.forEach(stock => {
+      const tier = stock.tier;
+      const tierChance = (TIER_WIN_WEIGHTS[tier] || 0) / TIER_WIN_TOTAL;
+      const candidates = STOCKS.filter(s => s.tier === tier);
+      const tierTotal = candidates.reduce((s, c) => s + c.weight, 0);
+      const withinTier = stock.weight / tierTotal;
+
+      const winChance = WIN_CHANCE_3MATCH * tierChance * withinTier;
+      const winOdds = winChance > 0 ? Math.round(1 / winChance) : '—';
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><span class="ticker">${stock.ticker}</span> <span class="stock-name">${stock.name}</span></td>
+        <td>$${stock.price.toFixed(2)}</td>
+        <td><span class="tier-badge ${tierClass[tier]}">${tier.charAt(0).toUpperCase() + tier.slice(1)}</span></td>
+        <td class="${oddsClass[tier]}">1 in ${winOdds}</td>
+        <td>$${stock.price.toFixed(2)}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    // Set update date
+    document.getElementById('update-date').textContent =
+      new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  </script>
+</body>
+</html>

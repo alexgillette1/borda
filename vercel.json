@@ -14,7 +14,11 @@
     { "src": "/api/(.*)", "dest": "/api/[...path].js" },
     { "src": "/demo-user/(.*)", "dest": "/public/demo-user/$1" },
     { "src": "/demo-user", "dest": "/public/demo-user/index.html" },
-    { "src": "/chances.html", "dest": "/public/chances.html" },
+    { "src": "/chances\\.html", "dest": "/public/chances.html" },
+    { "src": "/chances", "dest": "/public/chances.html" },
+    { "src": "/terms", "dest": "/public/terms.html" },
+    { "src": "/privacy", "dest": "/public/privacy.html" },
+    { "src": "/rules", "dest": "/public/rules.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
